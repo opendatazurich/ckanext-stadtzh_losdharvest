@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from ckanext.harvest.harvesters import HarvesterBase
+from ckanext.stadtzh_losdharvest.processors import RDFParser
 from pylons import config
 import logging
 log = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class StadtzhLosdHarvester(HarvesterBase):
 
     def gather_stage(self, harvest_job):
         log.debug('In StadtzhLosdHarvester gather_stage')
+        parser = RDFParser()
         return True
 
     def fetch_stage(self, harvest_object):
