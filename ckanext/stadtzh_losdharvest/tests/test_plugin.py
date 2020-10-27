@@ -1,5 +1,5 @@
-"""Tests for plugin.py."""
-import ckanext.stadtzh_losdharvest.plugin as plugin
+"""Tests for harvester.py."""
+import ckanext.stadtzh_losdharvest.harvester as harvester
 
-def test_plugin():
+def test_harvester():
     pass
