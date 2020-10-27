@@ -7,6 +7,9 @@ python:
     - "2.7"
 env:
     - CKANVERSION=2.7
+services:
+    - redis-server
+    - postgresql
 install:
     - bash bin/travis-build.bash
     - pip install coveralls
