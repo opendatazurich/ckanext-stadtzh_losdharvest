@@ -1,48 +1,9 @@
-.. You should enable this project on travis-ci.org and coveralls.io to make
-   these badges work. The necessary Travis and Coverage config files have been
-   generated for you.
-
-.. image:: https://travis-ci.org/opendatazurich/ckanext-stadtzh_losdharvest.svg?branch=master
-    :target: https://travis-ci.org/opendatazurich/ckanext-stadtzh_losdharvest
-
-.. image:: https://coveralls.io/repos/opendatazurich/ckanext-stadtzh_losdharvest/badge.svg
-  :target: https://coveralls.io/r/opendatazurich/ckanext-stadtzh_losdharvest
-
-.. image:: https://pypip.in/download/ckanext-stadtzh_losdharvest/badge.svg
-    :target: https://pypi.python.org/pypi//ckanext-stadtzh_losdharvest/
-    :alt: Downloads
-
-.. image:: https://pypip.in/version/ckanext-stadtzh_losdharvest/badge.svg
-    :target: https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest/
-    :alt: Latest Version
-
-.. image:: https://pypip.in/py_versions/ckanext-stadtzh_losdharvest/badge.svg
-    :target: https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest/
-    :alt: Supported Python versions
-
-.. image:: https://pypip.in/status/ckanext-stadtzh_losdharvest/badge.svg
-    :target: https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest/
-    :alt: Development Status
-
-.. image:: https://pypip.in/license/ckanext-stadtzh_losdharvest/badge.svg
-    :target: https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest/
-    :alt: License
-
 =============
 ckanext-stadtzh_losdharvest
 =============
 
-.. Put a description of your extension here:
-   What does it do? What features does it have?
-   Consider including some screenshots or embedding a video!
-
-
-------------
-Requirements
-------------
-
-For example, you might want to mention here which versions of CKAN this
-extension works with.
+A harvester to import datasets from the City of Zürich's LOSD portal to its
+CKAN instance (https://data.stadt-zuerich.ch/).
 
 
 ------------
@@ -72,15 +33,13 @@ To install ckanext-stadtzh_losdharvest:
      sudo service apache2 reload
 
 
----------------
-Config Settings
----------------
+-----------------------
+Harvester Configuration
+-----------------------
 
-Document any optional config settings here. For example::
-
-    # The minimum number of hours to wait before re-checking a resource
-    # (optional, default: 24).
-    ckanext.stadtzh_losdharvest.some_setting = some_default_value
+    {
+      "rdf_format":"text/turtle"
+    }
 
 
 ------------------------
@@ -109,58 +68,3 @@ coverage installed in your virtualenv (``pip install coverage``) then run::
 
     nosetests --nologcapture --with-pylons=test.ini --with-coverage --cover-package=ckanext.stadtzh_losdharvest --cover-inclusive --cover-erase --cover-tests
 
-
----------------------------------
-Registering ckanext-stadtzh_losdharvest on PyPI
----------------------------------
-
-ckanext-stadtzh_losdharvest should be availabe on PyPI as
-https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest. If that link doesn't work, then
-you can register the project on PyPI for the first time by following these
-steps:
-
-1. Create a source distribution of the project::
-
-     python setup.py sdist
-
-2. Register the project::
-
-     python setup.py register
-
-3. Upload the source distribution to PyPI::
-
-     python setup.py sdist upload
-
-4. Tag the first release of the project on GitHub with the version number from
-   the ``setup.py`` file. For example if the version number in ``setup.py`` is
-   0.0.1 then do::
-
-       git tag 0.0.1
-       git push --tags
-
-
-----------------------------------------
-Releasing a New Version of ckanext-stadtzh_losdharvest
-----------------------------------------
-
-ckanext-stadtzh_losdharvest is availabe on PyPI as https://pypi.python.org/pypi/ckanext-stadtzh_losdharvest.
-To publish a new version to PyPI follow these steps:
-
-1. Update the version number in the ``setup.py`` file.
-   See `PEP 440 <http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers>`_
-   for how to choose version numbers.
-
-2. Create a source distribution of the new version::
-
-     python setup.py sdist
-
-3. Upload the source distribution to PyPI::
-
-     python setup.py sdist upload
-
-4. Tag the new release of the project on GitHub with the version number from
-   the ``setup.py`` file. For example if the version number in ``setup.py`` is
-   0.0.2 then do::
-
-       git tag 0.0.2
-       git push --tags
