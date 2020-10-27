@@ -80,7 +80,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points='''
         [ckan.plugins]
-        stadtzh_losdharvest=ckanext.stadtzh_losdharvest.plugin:StadtzhLosdHarvester
+        stadtzh_losdharvest=ckanext.stadtzh_losdharvest.harvester:StadtzhLosdHarvester
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan

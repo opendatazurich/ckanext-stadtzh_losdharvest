@@ -19,8 +19,8 @@ class StadtzhLosdHarvester(HarvesterBase):
 
     def info(self):
         return {
-            'name': 'stadtzh_losd_harvester',
-            'title': 'Harvester for the City of Zurich',
+            'name': 'stadtzh_losdharvest',
+            'title': 'LOSD Harvester for the City of Zurich',
             'description': 'Harvester for the LOSD Portal of the City of Zurich'  # noqa
         }
 
