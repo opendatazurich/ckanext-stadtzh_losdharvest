@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import rdflib
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import Namespace, RDFS, RDF, SKOS
@@ -18,8 +20,6 @@ log = logging.getLogger(__name__)
 BASE = Namespace('<https://ld.stadt-zuerich.ch/>')
 QUDT = Namespace('<http://qudt.org/schema/qudt#>')
 VOID = Namespace('<http://rdfs.org/ns/void#>')
-RDF = Namespace('<http://www.w3.org/1999/02/22-rdf-syntax-ns#>')
-RDFS = Namespace('<http://www.w3.org/2000/01/rdf-schema#>')
 OWL = Namespace('<http://www.w3.org/2002/07/owl#>')
 XSD = Namespace('<http://www.w3.org/2001/XMLSchema#>')
 DCTERMS = Namespace('<http://purl.org/dc/terms/>')
@@ -33,7 +33,6 @@ DOAP = Namespace('<http://usefulinc.com/ns/doap#>')
 DUV = Namespace('<http://www.w3.org/ns/duv#>')
 WD = Namespace('<http://www.wikidata.org/entity/>')
 CUBE = Namespace('<http://ns.bergnet.org/cube/>')
-SKOS = Namespace('<http://www.w3.org/2004/02/skos/core#>')
 
 namespaces = {
     'base': BASE,
@@ -74,8 +73,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         # manually setting the one dataset that we have so far
         dataset_dict['title'] = "Luftqualitaet Schweiz (Jahreswerte)"
         dataset_dict['name'] = "luftqualitaet-schweiz-jahreswerte"
-        dataset_dict['data_publisher'] = "Bundesamt fur Umwelt BAFU"
-        dataset_dict['identifier'] = "UBD0028@bafu.admin.ch"
+        dataset_dict['data_publisher'] = "Stadt Zürich"
         dataset_dict['url'] = 'http://example.com'
         dataset_dict['extras'] = []
         dataset_dict['resources'] = []
