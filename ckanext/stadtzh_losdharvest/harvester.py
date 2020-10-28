@@ -33,3 +33,31 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             source_config = json.dumps(source_config_obj)
 
         return super(StadtzhLosdHarvester, self).validate_config(source_config)  # noqa
+
+    def before_download(self, url, harvest_job):
+        # save the harvest_job on the instance
+        self.harvest_job = harvest_job
+
+        return url, []
+
+    def _get_guid(self, dataset_dict, source_url=None):  # noqa
+        """
+        Try to get a unique identifier for a harvested dataset.
+
+        We use source URL + dataset name, which is not ideal as it might
+        change. (If we get a more stable identifier from LOSD in the future,
+        we can use that instead.)
+
+        When data is output as DCAT for harvesting, the
+        StadtzhSwissDcatProfile is used, which generates a guid from
+        dataset id + organization id. That means this guid won't be used
+        for opendata.swiss.
+        """
+        guid = None
+
+        if dataset_dict.get('name'):
+            guid = dataset_dict['name']
+            if source_url:
+                guid = source_url.rstrip('/') + '/' + guid
+
+        return guid
