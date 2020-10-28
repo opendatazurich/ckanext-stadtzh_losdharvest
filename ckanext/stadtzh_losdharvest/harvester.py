@@ -32,7 +32,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             source_config_obj['rdf_format'] = 'text/turtle'
             source_config = json.dumps(source_config_obj)
 
-        return super(StadtzhLosdHarvester, self).validate_config(source_config)  # noqa
+        return super(StadtzhLosdHarvester, self).\
+            validate_config(source_config)
 
     def before_download(self, url, harvest_job):
         # save the harvest_job on the instance
