@@ -1,9 +1,16 @@
-=============
+===========================
 ckanext-stadtzh_losdharvest
-=============
+===========================
 
 A harvester to import datasets from the City of Zürich's LOSD portal to its
 CKAN instance (https://data.stadt-zuerich.ch/).
+
+
+------------
+Requirements
+------------
+
+This harvester was developed against CKAN 2.7.
 
 
 ------------
@@ -33,9 +40,22 @@ To install ckanext-stadtzh_losdharvest:
      sudo service apache2 reload
 
 
+---------------
+Config Settings
+---------------
+
+Add the profile to the CKAN config as below. If you have multiple profiles,
+separate them with spaces::
+
+   ckanext.dcat.rdf.profiles = stadtzh_losdharvest_dcat
+
+
 -----------------------
 Harvester Configuration
 -----------------------
+
+The RDF format of the data to be harvested can be set in the harvester
+configuration. If it is not set, the default value is "text/turtle"::
 
     {
       "rdf_format":"text/turtle"
