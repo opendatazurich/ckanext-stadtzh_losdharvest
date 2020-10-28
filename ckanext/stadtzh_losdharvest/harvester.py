@@ -14,26 +14,26 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
     """
     LOSD harvester for the City of Zürich
     """
+
     p.implements(IDCATRDFHarvester, inherit=True)
 
     harvest_job = None
 
     def info(self):
         return {
-            'name': 'stadtzh_losdharvest',
-            'title': 'LOSD Harvester for the City of Zurich',
-            'description': 'Harvester for the LOSD Portal of the City of Zurich'  # noqa
+            "name": "stadtzh_losdharvest",
+            "title": "LOSD Harvester for the City of Zurich",
+            "description": "Harvester for the LOSD Portal of the City of Zurich",  # noqa
         }
 
     def validate_config(self, source_config):
         source_config_obj = json.loads(source_config)
 
-        if 'rdf_format' not in source_config_obj:
-            source_config_obj['rdf_format'] = 'text/turtle'
+        if "rdf_format" not in source_config_obj:
+            source_config_obj["rdf_format"] = "text/turtle"
             source_config = json.dumps(source_config_obj)
 
-        return super(StadtzhLosdHarvester, self).\
-            validate_config(source_config)
+        return super(StadtzhLosdHarvester, self).validate_config(source_config)
 
     def before_download(self, url, harvest_job):
         # save the harvest_job on the instance
@@ -46,7 +46,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         Overwritten from DCATRDFHarvester to return the given dataset
         identifier, or None if the dataset has no identifier.
         """
-        if dataset_dict.get('identifier'):
-            return dataset_dict['identifier']
+        if dataset_dict.get("identifier"):
+            return dataset_dict["identifier"]
 
         return None
