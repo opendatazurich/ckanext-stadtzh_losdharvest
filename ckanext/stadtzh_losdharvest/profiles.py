@@ -1,38 +1,29 @@
 # coding=utf-8
 
-import rdflib
-from rdflib import URIRef, BNode, Literal
-from rdflib.namespace import Namespace, RDFS, RDF, SKOS
-
-from datetime import datetime
-
-from ckantoolkit import config
-
-import re
-
-from ckanext.dcat.profiles import RDFProfile, SchemaOrgProfile
-from ckanext.dcat.utils import resource_uri, publisher_uri_from_dataset_dict
-from ckan.lib.munge import munge_tag
-
 import logging
+
+import rdflib
+from ckanext.dcat.profiles import RDFProfile
+from rdflib.namespace import RDF, RDFS, SKOS, Namespace
+
 log = logging.getLogger(__name__)
 
-BASE = Namespace('<https://ld.stadt-zuerich.ch/>')
-QUDT = Namespace('<http://qudt.org/schema/qudt#>')
-VOID = Namespace('<http://rdfs.org/ns/void#>')
-OWL = Namespace('<http://www.w3.org/2002/07/owl#>')
-XSD = Namespace('<http://www.w3.org/2001/XMLSchema#>')
-DCTERMS = Namespace('<http://purl.org/dc/terms/>')
-FOAF = Namespace('<http://xmlns.com/foaf/0.1/>')
-WV = Namespace('<http://vocab.org/waiver/terms/norms>')
-SD = Namespace('<http://www.w3.org/ns/sparql-service-description#>')
-DCAT = Namespace('<http://www.w3.org/ns/dcat#>')
-SCHEMA = Namespace('<http://schema.org/>')
-TIME = Namespace('<http://www.w3.org/2006/time#>')
-DOAP = Namespace('<http://usefulinc.com/ns/doap#>')
-DUV = Namespace('<http://www.w3.org/ns/duv#>')
-WD = Namespace('<http://www.wikidata.org/entity/>')
-CUBE = Namespace('<http://ns.bergnet.org/cube/>')
+BASE = Namespace('https://ld.stadt-zuerich.ch/')
+QUDT = Namespace('http://qudt.org/schema/qudt#')
+VOID = Namespace('http://rdfs.org/ns/void#')
+OWL = Namespace('http://www.w3.org/2002/07/owl#')
+XSD = Namespace('http://www.w3.org/2001/XMLSchema#')
+DCTERMS = Namespace('http://purl.org/dc/terms/')
+FOAF = Namespace('http://xmlns.com/foaf/0.1/')
+WV = Namespace('http://vocab.org/waiver/terms/norms')
+SD = Namespace('http://www.w3.org/ns/sparql-service-description#')
+DCAT = Namespace('http://www.w3.org/ns/dcat#')
+SCHEMA = Namespace('http://schema.org/')
+TIME = Namespace('http://www.w3.org/2006/time#')
+DOAP = Namespace('http://usefulinc.com/ns/doap#')
+DUV = Namespace('http://www.w3.org/ns/duv#')
+WD = Namespace('http://www.wikidata.org/entity/')
+CUBE = Namespace('http://ns.bergnet.org/cube/')
 
 namespaces = {
     'base': BASE,
@@ -56,31 +47,81 @@ namespaces = {
     'skos': SKOS
 }
 
-slug_id_pattern = re.compile('[^/]+(?=/$|$)')
-
 
 class StadtzhLosdDcatProfile(RDFProfile):
-    '''
+    """
     An RDF profile for the LOSD Harvester
-    '''
+    """
+    publishers = []
 
-    def parse_dataset(self, dataset_dict, dataset_ref):  # noqa
+    def __init__(self, graph, compatibility_mode=False):
+        super(StadtzhLosdDcatProfile, self).__init__(graph, compatibility_mode)
+
+        self.publishers = self._get_publishers()
+
+    def parse_dataset(self, dataset_dict, dataset_ref):
         log.debug("Parsing dataset '%r'" % dataset_ref)
 
-        # TODO: transform this later into a profile that
-        #       finds the correct values by transformations
-
-        # manually setting the one dataset that we have so far
-        dataset_dict['title'] = "Luftqualitaet Schweiz (Jahreswerte)"
-        dataset_dict['name'] = "luftqualitaet-schweiz-jahreswerte"
-        dataset_dict['data_publisher'] = "Stadt Zürich"
-        dataset_dict['url'] = 'http://example.com'
         dataset_dict['extras'] = []
         dataset_dict['resources'] = []
+
+        # Basic fields
+        for key, predicate in (
+                ('title', SCHEMA.name),
+                ('notes', SCHEMA.description),
+                ('url', DCAT.landingPage),
+                ('identifier', SCHEMA.identifier),
+                ('dateFirstPublished', SCHEMA.dateCreated),
+                ('dateLastUpdated', SCHEMA.dateModified),
+                ):
+            value = self._object_value(dataset_ref, predicate)
+            if value:
+                dataset_dict[key] = value
+
+        dataset_dict['maintainer'] = 'Open Data Zürich'
+        dataset_dict['maintainer_email'] = 'opendata@zuerich.ch'
+
+        # Todo: the lower() here is only necessary because the example data
+        # uses both upper and lower case for the publisher definition.
+        # Remove it when that's fixed.
+        publisher_obj = self._object_value(dataset_ref, SCHEMA.publisher).lower()
+        publisher = self.publishers[publisher_obj]
+        dataset_dict['author'] = publisher['name'] or publisher['uri']
+
+        # Tags
+        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
+        tags = [{'name': tag} for tag in keywords]
+        dataset_dict['tags'] = tags
 
         resource_dict = {
             'url': 'http://example.com',
             'licence_id': "NonCommercialAllowed-CommercialAllowed-ReferenceNotRequired",
         }
         dataset_dict['resources'].append(resource_dict)
+
         return dataset_dict
+
+    def _get_publishers(self):
+        """
+        Get data on all publishers defined in the graph.
+        """
+        publishers = {}
+        publisher_objects = [
+            SCHEMA.GovernmentOrganization,
+            SCHEMA.Corporation,
+            FOAF.GovernmentOrganization
+        ]
+
+        for obj in publisher_objects:
+            for publisher in self.g.subjects(RDF.type, obj):
+                uri = (unicode(publisher) if isinstance(publisher,
+                                                        rdflib.term.URIRef) else '')
+                name = self._object_value(publisher, SCHEMA.name)
+                url = self._object_value(publisher, FOAF.homepage) or \
+                    self._object_value(publisher, SCHEMA.url)
+
+                publishers[uri] = {'uri': uri,
+                                   'name': name,
+                                   'url': url}
+
+        return publishers
