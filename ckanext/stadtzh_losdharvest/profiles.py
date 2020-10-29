@@ -65,7 +65,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def parse_dataset(self, dataset_dict, dataset_ref):
         log.debug("Parsing dataset '%r'" % dataset_ref)
 
-        dataset_dict['name'] = munge_title_to_name(dataset_dict['title'])
         stadtzhharvest_find_or_create_organization(dataset_dict)
         dataset_dict["extras"] = []
         dataset_dict["resources"] = []
@@ -83,6 +82,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
+        dataset_dict['name'] = munge_title_to_name(dataset_dict['title'])
 
         publisher_obj = self._object_value(dataset_ref, SCHEMA.publisher)
         publisher = self.publishers[publisher_obj]
