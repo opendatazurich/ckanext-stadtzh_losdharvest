@@ -77,6 +77,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("notes", SCHEMA.description),
             ("dateFirstPublished", SCHEMA.dateCreated),
             ("dateLastUpdated", SCHEMA.dateModified),
+            ("sparqlEndpoint", VOID.sparqlEndpoint),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -94,15 +95,13 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         # Tags
         dataset_dict["tags"] = self._get_tags(dataset_ref)
-
-        resource_dict = {
-            "url": "http://example.com",
-            "licence_id": "NonCommercialAllowed-CommercialAllowed-ReferenceNotRequired",
-        }
-        dataset_dict["resources"].append(resource_dict)
+        
+        # Resources
+        dataset_dict["resources"] = \
+            self._build_resources(dataset_ref=dataset_ref,
+                                dataset_dict=dataset_dict)
 
         return dataset_dict
-
 
     def _get_publishers(self):
         """
@@ -142,11 +141,53 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """get all keyword_refs for a dataset"""
         keyword_refs = []
         subjects = [dataset_ref]
-        subjects.extend([o for o in self.g.objects(subject=dataset_ref, predicate=DCAT.distribution)])
+        subjects.extend(self._get_resource_refs(dataset_ref))
+        subjects.extend(self._get_cube_refs(dataset_ref))
         subjects.extend([o for o in self.g.objects(subject=dataset_ref, predicate=SCHEMA.hasPart)])
         for subject in subjects:
             keyword_refs.extend([k for k in self.g.objects(subject=subject, predicate=DCAT.keyword)])
         return keyword_refs
+
+    def _build_resources(self, dataset_ref, dataset_dict):
+        """
+        get resources for the dataset: dcat:distributions or cube:Cube
+        """
+        resource_list = []
+        for resource_ref in self._get_resource_refs(dataset_ref):
+            resource_dict = {}
+            for key, predicate in (
+                    ("url", DCAT.downloadURL),
+                    ("created", SCHEMA.dateCreated),
+            ):
+                value = self._object_value(resource_ref, predicate)
+                if value:
+                    resource_dict[key] = value
+            if not resource_dict.get("name"):
+                resource_dict['name'] = dataset_dict['name']
+            resource_dict['url_type'] = 'upload'
+            resource_list.append(resource_dict)
+
+        for cube_ref in self._get_cube_refs(dataset_ref):
+            resource_dict = {}
+            for key, predicate in (
+                    ("name", SCHEMA.name),
+            ):
+                value = self._object_value(cube_ref, predicate)
+                if value:
+                    resource_dict[key] = value
+            resource_dict['url_type'] = 'api'
+            resource_dict['url'] = dataset_dict['sparqlEndpoint']
+            resource_list.append(resource_dict)
+
+        return resource_list
+
+    def _get_cube_refs(self, dataset_ref):
+        """get all cube refs for the dataset"""
+        return [o for o in self.g.objects(subject=dataset_ref, predicate=SCHEMA.hasPart)]
+
+    def _get_resource_refs(self, dataset_ref):
+        """get all distributions refs for the dataset"""
+        return [o for o in self.g.objects(subject=dataset_ref, predicate=DCAT.distribution)]
 
     def _get_value_from_literal(self, ref):
         """gets value from literal"""
