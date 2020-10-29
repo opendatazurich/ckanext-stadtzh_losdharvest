@@ -4,7 +4,6 @@ import logging
 
 import rdflib
 from ckanext.dcat.profiles import RDFProfile
-from ckantoolkit import config
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 from rdflib import URIRef, BNode, Literal
 from ckan.lib.munge import munge_title_to_name
@@ -94,9 +93,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         )
 
         # Tags
-
         dataset_dict["tags"] = self._get_tags(dataset_ref)
-
 
         resource_dict = {
             "url": "http://example.com",
@@ -152,14 +149,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return keyword_refs
 
     def _get_value_from_literal(self, ref):
-        default_lang = config.get('ckan.locale_default', 'en')
+        """gets value from literal"""
         if isinstance(ref, Literal):
-            if ref.language and ref.language == default_lang:
-                return unicode(ref)
-            else:
-                return unicode(ref)
-        else:
             return unicode(ref)
-
-
-
+        else:
+            return ''
