@@ -81,10 +81,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
 
-        # Todo: the lower() here is only necessary because the example data
-        # uses both upper and lower case for the publisher definition.
-        # Remove it when that's fixed.
-        publisher_obj = self._object_value(dataset_ref, SCHEMA.publisher).lower()
+        publisher_obj = self._object_value(dataset_ref, SCHEMA.publisher)
         publisher = self.publishers[publisher_obj]
         dataset_dict["author"] = dataset_dict["url"] = (
             publisher["name"] or publisher["uri"]
