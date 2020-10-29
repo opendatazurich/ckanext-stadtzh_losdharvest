@@ -5,6 +5,7 @@ import logging
 import rdflib
 from ckanext.dcat.profiles import RDFProfile
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
+from ckan.lib.munge import munge_title_to_name
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def parse_dataset(self, dataset_dict, dataset_ref):
         log.debug("Parsing dataset '%r'" % dataset_ref)
 
+        dataset_dict['name'] = munge_title_to_name(dataset_dict['title'])
         dataset_dict["extras"] = []
         dataset_dict["resources"] = []
 
@@ -70,7 +72,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
         for key, predicate in (
             ("title", SCHEMA.name),
             ("notes", SCHEMA.description),
-            ("identifier", SCHEMA.identifier),
             ("dateFirstPublished", SCHEMA.dateCreated),
             ("dateLastUpdated", SCHEMA.dateModified),
         ):

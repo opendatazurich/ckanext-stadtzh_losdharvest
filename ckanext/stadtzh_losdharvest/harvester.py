@@ -44,9 +44,9 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
     def _get_guid(self, dataset_dict, source_url=None):
         """
         Overwritten from DCATRDFHarvester to return the given dataset
-        identifier, or None if the dataset has no identifier.
+        name, or None if the dataset has no name.
         """
-        if dataset_dict.get("identifier"):
-            return dataset_dict["identifier"]
+        if dataset_dict.get("name"):
+            return dataset_dict['name']
 
         return None
