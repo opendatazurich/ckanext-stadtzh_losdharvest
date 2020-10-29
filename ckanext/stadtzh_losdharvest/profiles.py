@@ -6,6 +6,7 @@ import rdflib
 from ckanext.dcat.profiles import RDFProfile
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 from ckan.lib.munge import munge_title_to_name
+from ckanext.stadtzhharvest.utils import stadtzhharvest_find_or_create_organization
 
 log = logging.getLogger(__name__)
 
@@ -65,6 +66,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         log.debug("Parsing dataset '%r'" % dataset_ref)
 
         dataset_dict['name'] = munge_title_to_name(dataset_dict['title'])
+        stadtzhharvest_find_or_create_organization(dataset_dict)
         dataset_dict["extras"] = []
         dataset_dict["resources"] = []
 
