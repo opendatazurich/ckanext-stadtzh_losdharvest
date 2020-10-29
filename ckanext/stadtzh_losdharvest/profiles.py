@@ -4,7 +4,9 @@ import logging
 
 import rdflib
 from ckanext.dcat.profiles import RDFProfile
+from ckantoolkit import config
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
+from rdflib import URIRef, BNode, Literal
 from ckan.lib.munge import munge_title_to_name
 from ckanext.stadtzhharvest.utils import stadtzhharvest_find_or_create_organization
 
@@ -63,6 +65,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         self.publishers = self._get_publishers()
 
     def parse_dataset(self, dataset_dict, dataset_ref):
+
         log.debug("Parsing dataset '%r'" % dataset_ref)
 
         stadtzhharvest_find_or_create_organization(dataset_dict)
@@ -91,9 +94,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         )
 
         # Tags
-        keywords = self._object_value_list(dataset_ref, DCAT.keyword) or []
-        tags = [{"name": tag} for tag in keywords]
-        dataset_dict["tags"] = tags
+
+        dataset_dict["tags"] = self._get_tags(dataset_ref)
+
 
         resource_dict = {
             "url": "http://example.com",
@@ -102,6 +105,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["resources"].append(resource_dict)
 
         return dataset_dict
+
 
     def _get_publishers(self):
         """
@@ -129,3 +133,33 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 publishers[uri] = {"uri": uri, "name": name, "url": url}
 
         return publishers
+
+    def _get_tags(self, dataset_ref):
+        """get all tags for a dataset"""
+        keyword_refs = self._get_keyword_refs_for_dataset_ref(dataset_ref)
+        keywords = [self._get_value_from_literal(ref) for ref in keyword_refs]
+        tags = [{"name": tag} for tag in keywords]
+        return tags
+
+    def _get_keyword_refs_for_dataset_ref(self, dataset_ref):
+        """get all keyword_refs for a dataset"""
+        keyword_refs = []
+        subjects = [dataset_ref]
+        subjects.extend([o for o in self.g.objects(subject=dataset_ref, predicate=DCAT.distribution)])
+        subjects.extend([o for o in self.g.objects(subject=dataset_ref, predicate=SCHEMA.hasPart)])
+        for subject in subjects:
+            keyword_refs.extend([k for k in self.g.objects(subject=subject, predicate=DCAT.keyword)])
+        return keyword_refs
+
+    def _get_value_from_literal(self, ref):
+        default_lang = config.get('ckan.locale_default', 'en')
+        if isinstance(ref, Literal):
+            if ref.language and ref.language == default_lang:
+                return unicode(ref)
+            else:
+                return unicode(ref)
+        else:
+            return unicode(ref)
+
+
+
