@@ -52,6 +52,10 @@ namespaces = {
     "skos": SKOS,
 }
 
+license_cd_for_license = {
+    rdflib.term.URIRef(u'http://creativecommons.org/licenses/by/3.0/'): 'cc_zero'
+}
+
 
 class StadtzhLosdDcatProfile(RDFProfile):
     """
@@ -96,6 +100,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         # Tags
         dataset_dict["tags"] = self._get_tags(dataset_ref)
+
+        # license
+        dataset_dict["license_url"] = 'http://creativecommons.org/licenses/by/3.0/'
+        dataset_dict["license_title"] = 'CC-BY 3.0'
         
         # Resources
         dataset_dict["resources"] = \
@@ -115,7 +123,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_tags(self, dataset_ref):
         """get all tags for a dataset"""
         keyword_refs = self._get_keyword_refs_for_dataset_ref(dataset_ref)
-        keywords = [self._get_value_from_literal(ref) for ref in keyword_refs]
+        keywords = [self._get_value_from_literal_or_uri(ref) for ref in keyword_refs]
         tags = [{"name": tag} for tag in keywords]
         return tags
 
@@ -127,6 +135,17 @@ class StadtzhLosdDcatProfile(RDFProfile):
         for subject in subjects:
             keyword_refs.extend([k for k in self.g.objects(subject=subject, predicate=DCAT.keyword)])
         return keyword_refs
+
+    def _get_license_code_for_dataset_ref(self, dataset_ref):
+        """Get license for a dataset ref"""
+        license_refs = []
+        for resource_ref in self._get_resource_refs_for_dataset_ref(dataset_ref):
+            license_ref = self._get_object_refs_for_subject_predicate(resource_ref, SCHEMA.license)
+            if license_ref:
+               license_refs.extend(license_ref)
+        license = [self._get_value_from_literal_or_uri(ref) for ref in license_refs][0]
+        license_code = license_cd_for_license[license]
+        return license_code
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
         resource_refs = self._get_object_refs_for_subject_predicate(dataset_ref, DCAT.distribution)
@@ -175,10 +194,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """get all objects refs for a subject and predicate combination"""
         return [o for o in self.g.objects(subject=subject_ref, predicate=predicate)]
 
-    def _get_value_from_literal(self, ref):
+    def _get_value_from_literal_or_uri(self, ref):
         """gets value from literal"""
         if isinstance(ref, Literal):
             return unicode(ref)
+        elif isinstance(ref, URIRef):
+            return ref
         else:
             return ''
 
