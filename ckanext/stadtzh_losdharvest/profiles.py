@@ -1,6 +1,8 @@
 # coding=utf-8
 
 import logging
+import isodate
+from datetime import datetime
 
 import rdflib
 from ckanext.dcat.profiles import RDFProfile
@@ -75,13 +77,20 @@ class StadtzhLosdDcatProfile(RDFProfile):
         for key, predicate in (
             ("title", SCHEMA.name),
             ("notes", SCHEMA.description),
-            ("dateFirstPublished", SCHEMA.dateCreated),
-            ("dateLastUpdated", SCHEMA.dateModified),
             ("sparqlEndpoint", VOID.sparqlEndpoint),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = value
+
+        # Date fields
+        for key, predicate in (
+            ("dateFirstPublished", SCHEMA.dateCreated),
+            ("dateLastUpdated", SCHEMA.dateModified),
+        ):
+            value = self._object_value(dataset_ref, predicate)
+            if value:
+                dataset_dict[key] = self._clean_datetime(value)
 
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
@@ -157,11 +166,16 @@ class StadtzhLosdDcatProfile(RDFProfile):
             resource_dict = {}
             for key, predicate in (
                     ("url", DCAT.downloadURL),
-                    ("created", SCHEMA.dateCreated),
             ):
                 value = self._object_value(resource_ref, predicate)
                 if value:
                     resource_dict[key] = value
+            for key, predicate in (
+                    ("created", SCHEMA.dateCreated),
+            ):
+                value = self._object_value(resource_ref, predicate)
+                if value:
+                    resource_dict[key] = self._clean_datetime(value)
             if not resource_dict.get("name"):
                 resource_dict['name'] = dataset_dict['name']
             resource_dict['url_type'] = 'upload'
@@ -195,3 +209,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
             return unicode(ref)
         else:
             return ''
+
+    def _clean_datetime(self, value):
+        try:
+            datetime_value = isodate.parse_date(value)
+            return datetime_value.strftime('%d.%m.%Y')
+        except (ValueError, KeyError, TypeError, IndexError):
+            return value
