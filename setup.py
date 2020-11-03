@@ -83,6 +83,9 @@ setup(
     entry_points='''
         [ckan.plugins]
         stadtzh_losdharvest=ckanext.stadtzh_losdharvest.harvester:StadtzhLosdHarvester
+        
+        [ckan.rdf.profiles]
+        stadtzh_losdharvest_dcat=ckanext.stadtzh_losdharvest.profiles:StadtzhLosdDcatProfile
 
         [babel.extractors]
         ckan = ckan.lib.extract:extract_ckan
@@ -99,4 +102,5 @@ setup(
             ('**/templates/**.html', 'ckan', None),
         ],
     }
+
 )
