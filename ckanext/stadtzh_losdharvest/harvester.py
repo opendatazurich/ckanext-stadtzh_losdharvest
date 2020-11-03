@@ -4,6 +4,7 @@ import json
 import logging
 
 import ckan.plugins as p
+
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 
