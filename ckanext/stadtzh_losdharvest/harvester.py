@@ -47,6 +47,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         name, or None if the dataset has no name.
         """
         if dataset_dict.get("name"):
-            return dataset_dict['name']
+            return dataset_dict["name"]
 
         return None
