@@ -206,6 +206,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _clean_datetime(self, value):
         try:
             datetime_value = isodate.parse_date(value)
-            return datetime_value.strftime('%d.%m.%Y')
+            return isodate.date_isoformat(datetime_value)
         except (ValueError, KeyError, TypeError, IndexError):
             return value
