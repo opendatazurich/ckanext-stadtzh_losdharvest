@@ -3,6 +3,7 @@
 import logging
 
 import isodate
+from datetime import datetime
 import rdflib
 from ckan.lib.munge import munge_title_to_name
 from rdflib import Literal, URIRef
@@ -91,8 +92,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("dateLastUpdated", SCHEMA.dateModified),
         ):
             value = self._object_value(dataset_ref, predicate)
+
             if value:
-                dataset_dict[key] = self._clean_datetime(value)
+                dataset_dict["extras"].append({"key": key, "value": self._clean_datetime(value)})
 
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
@@ -238,6 +240,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _clean_datetime(self, value):
         try:
             datetime_value = isodate.parse_date(value)
-            return isodate.date_isoformat(datetime_value)
+            return datetime_value.strftime('%d.%m.%Y')
         except (ValueError, KeyError, TypeError, IndexError):
             return value
