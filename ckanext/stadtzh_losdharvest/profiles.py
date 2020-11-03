@@ -104,6 +104,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         # license
         dataset_dict["license_url"] = 'http://creativecommons.org/licenses/by/3.0/'
         dataset_dict["license_title"] = 'CC-BY 3.0'
+
+        # rights
+        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(dataset_ref)
         
         # Resources
         dataset_dict["resources"] = \
@@ -146,6 +149,20 @@ class StadtzhLosdDcatProfile(RDFProfile):
         license = [self._get_value_from_literal_or_uri(ref) for ref in license_refs][0]
         license_code = license_cd_for_license[license]
         return license_code
+
+    def _get_rights_for_dataset_ref(self, dataset_ref):
+        """Get rights statement for a dataset ref"""
+
+        resource_rights_refs = []
+        for resource_ref in self._get_resource_refs_for_dataset_ref(dataset_ref):
+            resource_rights_ref = self._get_object_refs_for_subject_predicate(resource_ref, DCTERMS.rights)
+            if resource_rights_ref:
+               resource_rights_refs.extend(resource_rights_ref)
+        import pdb; pdb.set_trace()
+        rights_class_refs = self._get_object_refs_for_subject_predicate(resource_rights_refs[0], RDF.type)
+        rights_statements_refs = self._get_object_refs_for_subject_predicate(rights_class_refs[0], DCTERMS.RightsStatement)
+        rights_statements = [self._get_value_from_literal_or_uri(ref) for ref in rights_statements_refs]
+        return rights_statements[0]
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
         resource_refs = self._get_object_refs_for_subject_predicate(dataset_ref, DCAT.distribution)
