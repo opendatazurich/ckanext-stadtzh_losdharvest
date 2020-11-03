@@ -99,8 +99,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         
         # Resources
         dataset_dict["resources"] = \
-            self._build_resources(dataset_ref=dataset_ref,
-                                dataset_dict=dataset_dict)
+            self._build_resources_dict(dataset_ref=dataset_ref,
+                                       dataset_dict=dataset_dict)
 
         return dataset_dict
 
@@ -108,7 +108,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """
         Get publisher for a dataset.
         """
-        publisher_refs = self._get_predicate_refs_for_dataset(dataset_ref, SCHEMA.publisher)
+        publisher_refs = self._get_object_refs_for_subject_predicate(dataset_ref, SCHEMA.publisher)
         publishers = [self._object_value(ref, SCHEMA.name) for ref in publisher_refs]
         return publishers
 
@@ -122,19 +122,23 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_keyword_refs_for_dataset_ref(self, dataset_ref):
         """get all keyword_refs for a dataset"""
         keyword_refs = []
-        subjects = [dataset_ref]
-        subjects.extend(self._get_predicate_refs_for_dataset(dataset_ref, DCAT.distribution))
-        subjects.extend(self._get_predicate_refs_for_dataset(dataset_ref, SCHEMA.hasPart))
+        subjects = self._get_resource_refs_for_dataset_ref(dataset_ref)
+        subjects.append(dataset_ref)
         for subject in subjects:
             keyword_refs.extend([k for k in self.g.objects(subject=subject, predicate=DCAT.keyword)])
         return keyword_refs
 
-    def _build_resources(self, dataset_ref, dataset_dict):
+    def _get_resource_refs_for_dataset_ref(self, dataset_ref):
+        resource_refs = self._get_object_refs_for_subject_predicate(dataset_ref, DCAT.distribution)
+        resource_refs.extend(self._get_object_refs_for_subject_predicate(dataset_ref, SCHEMA.hasPart))
+        return resource_refs
+
+    def _build_resources_dict(self, dataset_ref, dataset_dict):
         """
         get resources for the dataset: dcat:distributions or cube:Cube
         """
         resource_list = []
-        for resource_ref in self._get_predicate_refs_for_dataset(dataset_ref, DCAT.distribution):
+        for resource_ref in self._get_object_refs_for_subject_predicate(dataset_ref, DCAT.distribution):
             resource_dict = {}
             for key, predicate in (
                     ("url", DCAT.downloadURL),
@@ -153,7 +157,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             resource_dict['url_type'] = 'upload'
             resource_list.append(resource_dict)
 
-        for cube_ref in self._get_predicate_refs_for_dataset(dataset_ref, SCHEMA.hasPart):
+        for cube_ref in self._get_object_refs_for_subject_predicate(dataset_ref, SCHEMA.hasPart):
             resource_dict = {}
             for key, predicate in (
                     ("name", SCHEMA.name),
@@ -167,9 +171,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return resource_list
 
-    def _get_predicate_refs_for_dataset(self, dataset_ref, predicate):
-        """get all refs for the dataset for a predicate"""
-        return [o for o in self.g.objects(subject=dataset_ref, predicate=predicate)]
+    def _get_object_refs_for_subject_predicate(self, subject_ref, predicate):
+        """get all objects refs for a subject and predicate combination"""
+        return [o for o in self.g.objects(subject=subject_ref, predicate=predicate)]
 
     def _get_value_from_literal(self, ref):
         """gets value from literal"""
