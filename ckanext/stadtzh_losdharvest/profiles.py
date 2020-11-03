@@ -57,13 +57,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
     """
     An RDF profile for the LOSD Harvester
     """
-
-    publishers = []
-
     def __init__(self, graph, compatibility_mode=False):
         super(StadtzhLosdDcatProfile, self).__init__(graph, compatibility_mode)
-
-        self.publishers = self._get_publishers()
 
     def parse_dataset(self, dataset_dict, dataset_ref):
 
@@ -96,11 +91,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
         dataset_dict['name'] = munge_title_to_name(dataset_dict['title'])
 
-        publisher_obj = self._object_value(dataset_ref, SCHEMA.publisher)
-        publisher = self.publishers[publisher_obj]
-        dataset_dict["author"] = dataset_dict["url"] = (
-            publisher["name"] or publisher["uri"]
-        )
+        # publishers
+        dataset_dict["author"] = self._get_publisher_for_dataset(dataset_ref)[0]
 
         # Tags
         dataset_dict["tags"] = self._get_tags(dataset_ref)
@@ -112,31 +104,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return dataset_dict
 
-    def _get_publishers(self):
+    def _get_publisher_for_dataset(self, dataset_ref):
         """
-        Get data on all publishers defined in the graph.
+        Get publisher for a dataset.
         """
-        publishers = {}
-        publisher_objects = [
-            SCHEMA.GovernmentOrganization,
-            SCHEMA.Corporation,
-            FOAF.GovernmentOrganization,
-        ]
-
-        for obj in publisher_objects:
-            for publisher in self.g.subjects(RDF.type, obj):
-                uri = (
-                    unicode(publisher)
-                    if isinstance(publisher, rdflib.term.URIRef)
-                    else ""
-                )
-                name = self._object_value(publisher, SCHEMA.name)
-                url = self._object_value(
-                    publisher, FOAF.homepage
-                ) or self._object_value(publisher, SCHEMA.url)
-
-                publishers[uri] = {"uri": uri, "name": name, "url": url}
-
+        publisher_refs = self._get_predicate_refs_for_dataset(dataset_ref, SCHEMA.publisher)
+        publishers = [self._object_value(ref, SCHEMA.name) for ref in publisher_refs]
         return publishers
 
     def _get_tags(self, dataset_ref):
