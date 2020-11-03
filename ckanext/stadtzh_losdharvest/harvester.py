@@ -35,12 +35,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         return super(StadtzhLosdHarvester, self).validate_config(source_config)
 
-    def before_download(self, url, harvest_job):
-        # save the harvest_job on the instance
-        self.harvest_job = harvest_job
-
-        return url, []
-
     def _get_guid(self, dataset_dict, source_url=None):
         """
         Overwritten from DCATRDFHarvester to return the given dataset

@@ -6,9 +6,8 @@ import isodate
 import rdflib
 from ckan.lib.munge import munge_title_to_name
 from ckanext.dcat.profiles import RDFProfile
-from ckanext.stadtzhharvest.utils import (
-    stadtzhharvest_find_or_create_organization,
-)
+from ckanext.stadtzhharvest.utils import \
+    stadtzhharvest_find_or_create_organization
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
