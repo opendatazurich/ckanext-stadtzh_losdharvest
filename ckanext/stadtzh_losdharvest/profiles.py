@@ -98,9 +98,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["name"] = munge_title_to_name(dataset_dict["title"])
 
         # publishers
-        dataset_dict["author"] = self._get_publisher_for_dataset(dataset_ref)[
-            0
-        ]
+        publishers = self._get_publishers_for_dataset_ref(dataset_ref)
+        if publishers:
+            dataset_dict["author"] = publishers[0]
 
         # Tags
         dataset_dict["tags"] = self._get_tags(dataset_ref)
@@ -122,9 +122,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return dataset_dict
 
-    def _get_publisher_for_dataset(self, dataset_ref):
+    def _get_publishers_for_dataset_ref(self, dataset_ref):
         """
-        Get publisher for a dataset.
+        Get publishers for a dataset.
         """
         publisher_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, SCHEMA.publisher
@@ -170,14 +170,15 @@ class StadtzhLosdDcatProfile(RDFProfile):
             )
             if license_ref:
                 license_refs.extend(license_ref)
-        license = [
-            self._get_value_from_literal_or_uri(ref) for ref in license_refs
-        ][0]
-        try:
-            license_code = LICENSE_MAPPING_FOR_LOSD[license]
-            return license_code
-        except KeyError:
-            return ""
+        if license_refs:
+            license_ref = license_refs[0]
+            license = self._get_value_from_literal_or_uri(license_ref)
+            try:
+                license_code = LICENSE_MAPPING_FOR_LOSD[license]
+                return license_code
+            except KeyError:
+                return ""
+        return ""
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
@@ -190,16 +191,22 @@ class StadtzhLosdDcatProfile(RDFProfile):
             )
             if refs:
                 resource_rights_refs.extend(refs)
-        dataset_rights_ref = resource_rights_refs[0]
-        rights_statement_ref = self._get_object_refs_for_subject_predicate(
-            dataset_rights_ref, SCHEMA.name
-        )[0]
-        rights_statement = self._get_value_from_literal_or_uri(
-            rights_statement_ref
-        )
-        return rights_statement
+        if resource_rights_refs:
+            dataset_rights_ref = resource_rights_refs[0]
+            rights_statement_refs = \
+                self._get_object_refs_for_subject_predicate(
+                    dataset_rights_ref, SCHEMA.name
+                )
+            if rights_statement_refs:
+                rights_statement_ref = rights_statement_refs[0]
+                rights_statement = self._get_value_from_literal_or_uri(
+                    rights_statement_ref
+                )
+                return rights_statement
+        return ""
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
+        """return all resource refs for a dataset as a list"""
         resource_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, DCAT.distribution
         )
@@ -237,7 +244,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 if value:
                     resource_dict[key] = value
             resource_dict["url_type"] = "api"
-            resource_dict["url"] = dataset_dict["sparqlEndpoint"]
+            resource_dict["url"] = dataset_dict.get("sparqlEndpoint")
             resource_list.append(resource_dict)
 
         return resource_list
