@@ -92,8 +92,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
-                dataset_dict[key] = self._clean_datetime(value)
-
+                dataset_dict[key] = self._format_datetime_as_string(value)
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
         dataset_dict["name"] = munge_title_to_name(dataset_dict["title"])
@@ -224,10 +223,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 value = self._object_value(resource_ref, predicate)
                 if value:
                     resource_dict[key] = value
-            for key, predicate in (("created", SCHEMA.dateCreated),):
-                value = self._object_value(resource_ref, predicate)
-                if value:
-                    resource_dict[key] = self._clean_datetime(value)
             if not resource_dict.get("name"):
                 resource_dict["name"] = dataset_dict["name"]
             resource_dict["url_type"] = "upload"
@@ -262,9 +257,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         else:
             return ""
 
-    def _clean_datetime(self, value):
+    def _format_datetime_as_string(self, value):
         try:
             datetime_value = isodate.parse_date(value)
-            return isodate.date_isoformat(datetime_value)
+            return datetime_value.strftime('%d.%m.%Y')
         except (ValueError, KeyError, TypeError, IndexError):
             return value
