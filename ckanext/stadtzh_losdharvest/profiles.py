@@ -170,14 +170,15 @@ class StadtzhLosdDcatProfile(RDFProfile):
             )
             if license_ref:
                 license_refs.extend(license_ref)
-        license = [
-            self._get_value_from_literal_or_uri(ref) for ref in license_refs
-        ][0]
-        try:
-            license_code = LICENSE_MAPPING_FOR_LOSD[license]
-            return license_code
-        except KeyError:
-            return ""
+        if license_refs:
+            license_ref = license_refs[0]
+            license = self._get_value_from_literal_or_uri(license_ref)
+            try:
+                license_code = LICENSE_MAPPING_FOR_LOSD[license]
+                return license_code
+            except KeyError:
+                return ""
+        return ""
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
