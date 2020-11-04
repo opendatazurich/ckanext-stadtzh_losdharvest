@@ -201,6 +201,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return rights_statement
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
+        """return all resource refs for a dataset as a list"""
         resource_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, DCAT.distribution
         )
