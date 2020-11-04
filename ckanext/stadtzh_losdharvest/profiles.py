@@ -56,7 +56,7 @@ namespaces = {
 license_cd_for_license = {
     rdflib.term.URIRef(
         u"http://creativecommons.org/licenses/by/3.0/"
-    ): "cc_zero"
+    ): "cc-by"
 }
 
 
@@ -107,11 +107,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["tags"] = self._get_tags(dataset_ref)
 
         # license
-        dataset_dict[
-            "license_url"
-        ] = "http://creativecommons.org/licenses/by/3.0/"
-        dataset_dict["license_title"] = "CC-BY 3.0"
 
+        dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(dataset_ref)
+        dataset_dict["legalInformation"] = "Stadtratsbeschluss DGA"
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
             dataset_ref=dataset_ref, dataset_dict=dataset_dict
@@ -159,6 +157,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_license_code_for_dataset_ref(self, dataset_ref):
         """Get license for a dataset ref"""
         license_refs = []
+        import pdb; pdb.set_trace()
         for resource_ref in self._get_resource_refs_for_dataset_ref(
             dataset_ref
         ):
