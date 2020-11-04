@@ -98,7 +98,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["name"] = munge_title_to_name(dataset_dict["title"])
 
         # publishers
-        publishers = self._get_publisher_for_dataset(dataset_ref)
+        publishers = self._get_publishers_for_dataset_ref(dataset_ref)
         if publishers:
             dataset_dict["author"] = publishers[0]
 
@@ -122,7 +122,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return dataset_dict
 
-    def _get_publisher_for_dataset(self, dataset_ref):
+    def _get_publishers_for_dataset_ref(self, dataset_ref):
         """
         Get publishers for a dataset.
         """
