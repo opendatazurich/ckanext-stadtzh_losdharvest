@@ -193,9 +193,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 resource_rights_refs.extend(refs)
         if resource_rights_refs:
             dataset_rights_ref = resource_rights_refs[0]
-            rights_statement_refs = self._get_object_refs_for_subject_predicate(
-                dataset_rights_ref, SCHEMA.name
-            )
+            rights_statement_refs = \
+                self._get_object_refs_for_subject_predicate(
+                    dataset_rights_ref, SCHEMA.name
+                )
             if rights_statement_refs:
                 rights_statement_ref = rights_statement_refs[0]
                 rights_statement = self._get_value_from_literal_or_uri(
