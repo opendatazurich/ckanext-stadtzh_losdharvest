@@ -53,10 +53,10 @@ namespaces = {
     "skos": SKOS,
 }
 
-license_cd_for_license = {
+LICENSE_MAPPING_FOR_LOSD = {
     rdflib.term.URIRef(
         u"http://creativecommons.org/licenses/by/3.0/"
-    ): "cc_zero"
+    ): "cc-by"
 }
 
 
@@ -107,10 +107,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["tags"] = self._get_tags(dataset_ref)
 
         # license
-        dataset_dict[
-            "license_url"
-        ] = "http://creativecommons.org/licenses/by/3.0/"
-        dataset_dict["license_title"] = "CC-BY 3.0"
+        dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
+            dataset_ref
+        )
 
         # rights
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
@@ -175,8 +174,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
         license = [
             self._get_value_from_literal_or_uri(ref) for ref in license_refs
         ][0]
-        license_code = license_cd_for_license[license]
-        return license_code
+        try:
+            license_code = LICENSE_MAPPING_FOR_LOSD[license]
+            return license_code
+        except KeyError:
+            return ""
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
