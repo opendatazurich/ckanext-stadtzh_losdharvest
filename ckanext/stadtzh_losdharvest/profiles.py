@@ -53,7 +53,7 @@ namespaces = {
     "skos": SKOS,
 }
 
-license_cd_for_license = {
+LICENSE_MAPPING_FOR_LOSD = {
     rdflib.term.URIRef(
         u"http://creativecommons.org/licenses/by/3.0/"
     ): "cc-by"
@@ -169,8 +169,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
         license = [
             self._get_value_from_literal_or_uri(ref) for ref in license_refs
         ][0]
-        license_code = license_cd_for_license[license]
-        return license_code
+        try:
+            license_code = LICENSE_MAPPING_FOR_LOSD[license]
+            return license_code
+        except KeyError:
+            return ""
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
         resource_refs = self._get_object_refs_for_subject_predicate(
