@@ -8,9 +8,12 @@ from ckan.lib.munge import munge_title_to_name
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
+from ckanext.dcat.processors import RDFParser, RDFParserException
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
+
+from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
 
@@ -129,6 +132,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
         publisher_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, SCHEMA.publisher
         )
+        for ref in publisher_refs:
+            if isinstance(ref, URIRef):
+                content, content_type = get_content_and_type(ref)
+                parser = RDFParser()
+                parser.parse(content, content_type)
         publishers = [
             self._object_value(ref, SCHEMA.name) for ref in publisher_refs
         ]
