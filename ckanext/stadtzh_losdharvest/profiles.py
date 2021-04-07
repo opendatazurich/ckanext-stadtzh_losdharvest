@@ -252,7 +252,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 if value:
                     resource_dict[key] = value
             resource_dict["url_type"] = "api"
-            resource_dict["url"] = dataset_dict.get("sparqlEndpoint")
             resource_list.append(resource_dict)
 
         return resource_list
