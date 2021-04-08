@@ -96,7 +96,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             # get the content and concatenate it to existing content
             view, view_type = super(DCATRDFHarvester, self)._get_content_and_type(
                 view_url, harvest_job)
-            log.warning(view)
+            # log.warning(view)
             results += view
 
         return results, content_type

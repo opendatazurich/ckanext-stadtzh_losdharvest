@@ -32,7 +32,7 @@ TIME = Namespace("http://www.w3.org/2006/time#")
 DOAP = Namespace("http://usefulinc.com/ns/doap#")
 DUV = Namespace("http://www.w3.org/ns/duv#")
 WD = Namespace("http://www.wikidata.org/entity/")
-CUBE = Namespace("http://ns.bergnet.org/cube/")
+CUBE = Namespace("https://cube.link/view/")
 
 namespaces = {
     "base": BASE,
@@ -118,6 +118,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref
         )
 
+        # Attributes
+        dataset_dict['sszFields'] = self._get_attributes(dataset_ref)
+
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
             dataset_ref=dataset_ref, dataset_dict=dataset_dict
@@ -137,6 +140,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 content, content_type = get_content_and_type(ref)
                 parser = RDFParser()
                 parser.parse(content, content_type)
+                # todo: actually do something with this information
         publishers = [
             self._object_value(ref, SCHEMA.name) for ref in publisher_refs
         ]
@@ -187,6 +191,43 @@ class StadtzhLosdDcatProfile(RDFProfile):
             except KeyError:
                 return ""
         return ""
+
+    def _get_attributes(self, dataset_ref):
+        """Get the attributes for the dataset out of the dimensions"""
+        attributes = []
+        refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, CUBE.dimension
+        )
+        for ref in refs:
+            # Setting the predicate like this because `CUBE.as` produced
+            # a Python error :(
+            code_url = self._get_object_refs_for_subject_predicate(
+                ref, rdflib.term.URIRef(u'https://cube.link/view/as'))
+
+            try:
+                content, content_type = get_content_and_type(code_url[0])
+            except RuntimeError as e:
+                log.info(e)
+
+            parser = LosdCodeParser()
+            parser.parse(content, content_type)
+            tech_name = parser.identifier()
+            speak_name = parser.name()
+
+            if tech_name:
+                attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
+            else:
+                attribute_name = speak_name
+
+            attributes.append(
+                (
+                    attribute_name,
+                    ''  # This would be the description, but we don't get one
+                )
+            )
+
+        return attributes
+
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
