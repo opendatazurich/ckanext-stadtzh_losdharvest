@@ -275,24 +275,29 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref, DCAT.distribution
         ):
             resource_dict = {}
-            for key, predicate in (("url", DCAT.downloadURL),):
+            for key, predicate in (
+                    ("url", DCAT.downloadURL),
+                    # TODO format is set on the LOSD endpoint but for some reason
+                    # can not be retrieved the same way mimetype is retrieved
+                    ("format", DCAT.format),
+                    ("mimetype", DCAT.mediaType),
+            ):
                 value = self._object_value(resource_ref, predicate)
                 if value:
                     resource_dict[key] = value
             if not resource_dict.get("name"):
                 resource_dict["name"] = dataset_dict["name"]
-            resource_dict["url_type"] = "upload"
-            resource_list.append(resource_dict)
 
-        for cube_ref in self._get_object_refs_for_subject_predicate(
-            dataset_ref, SCHEMA.hasPart
-        ):
-            resource_dict = {}
-            for key, predicate in (("name", SCHEMA.name),):
-                value = self._object_value(cube_ref, predicate)
-                if value:
-                    resource_dict[key] = value
-            resource_dict["url_type"] = "api"
+            if "csv" in resource_dict.get("mimetype"):
+                resource_dict["url_type"] = "file"
+                # TODO format should come from LOSD-endpoint and also this should be RDF
+                resource_dict["format"] = "CSV"
+                resource_dict["resource_type"] = "file"
+            else:
+                resource_dict["url_type"] = "api"
+                resource_dict["format"] = "CSV"
+                resource_dict["resource_type"] = "api"
+
             resource_list.append(resource_dict)
 
         return resource_list
