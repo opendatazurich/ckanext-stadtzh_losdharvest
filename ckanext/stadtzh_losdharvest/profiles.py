@@ -243,17 +243,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
-        resource_rights_refs = []
-        for resource_ref in self._get_resource_refs_for_dataset_ref(
-            dataset_ref
-        ):
-            refs = self._get_object_refs_for_subject_predicate(
-                resource_ref, DCTERMS.rights
-            )
-            if refs:
-                resource_rights_refs.extend(refs)
-        if resource_rights_refs:
-            dataset_rights_ref = resource_rights_refs[0]
+        refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, DCTERMS.rights
+        )
+        if refs:
+            dataset_rights_ref = refs[0]
             rights_statement_refs = \
                 self._get_object_refs_for_subject_predicate(
                     dataset_rights_ref, SCHEMA.name
