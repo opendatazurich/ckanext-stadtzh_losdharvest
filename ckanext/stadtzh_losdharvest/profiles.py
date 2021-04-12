@@ -281,11 +281,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref, DCAT.distribution
         ):
             resource_dict = {}
+            # For some reason, DCTERMS.format does not work so we have to
+            # use the explicit URIRef here.
             for key, predicate in (
                     ("url", DCAT.downloadURL),
-                    # TODO format is set on the LOSD endpoint but for some reason
-                    # can not be retrieved the same way mimetype is retrieved
-                    ("format", DCAT.format),
+                    ("format", rdflib.term.URIRef(u'http://purl.org/dc/terms/format')),
                     ("mimetype", DCAT.mediaType),
             ):
                 value = self._object_value(resource_ref, predicate)
@@ -296,11 +296,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
             if "csv" in resource_dict.get("mimetype"):
                 resource_dict["url_type"] = "file"
-                # TODO format should come from LOSD-endpoint and also this should be RDF
-                resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "file"
             else:
                 resource_dict["url_type"] = "api"
+                # Todo: remove this line once we are using the custom solr config locally
                 resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "api"
 
