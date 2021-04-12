@@ -14,7 +14,7 @@ from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
 
-from processors import LosdCodeParser
+from processors import LosdCodeParser, LosdPublisherParser
 from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
@@ -135,18 +135,16 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """
         Get publishers for a dataset.
         """
+        publishers = []
         publisher_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, SCHEMA.publisher
         )
         for ref in publisher_refs:
-            if isinstance(ref, URIRef):
-                content, content_type = get_content_and_type(ref)
-                parser = RDFParser()
-                parser.parse(content, content_type)
-                # todo: actually do something with this information
-        publishers = [
-            self._object_value(ref, SCHEMA.name) for ref in publisher_refs
-        ]
+            content, content_type = get_content_and_type(ref)
+            parser = LosdPublisherParser()
+            parser.parse(content, content_type)
+            publishers.append(parser.name().next())
+
         return publishers
 
     def _get_tags(self, dataset_ref):

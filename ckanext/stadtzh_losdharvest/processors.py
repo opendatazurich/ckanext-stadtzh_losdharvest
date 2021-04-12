@@ -35,3 +35,11 @@ class LosdCodeParser(RDFParser):
     def identifier(self):
         for obj in self.g.objects(predicate=SCHEMA.identifier):
             yield obj
+
+class LosdPublisherParser(RDFParser):
+    """Parses the data from a url like
+    https://ld.stadt-zuerich.ch/org/SSZ
+    """
+    def name(self):
+        for obj in self.g.objects(predicate=SCHEMA.name):
+            yield obj
