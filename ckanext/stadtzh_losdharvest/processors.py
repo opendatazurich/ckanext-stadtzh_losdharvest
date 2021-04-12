@@ -1,3 +1,4 @@
+# coding=utf-8
 import logging
 
 from rdflib.namespace import Namespace
@@ -27,8 +28,10 @@ class LosdCodeParser(RDFParser):
     https://ld.stadt-zuerich.ch/statistics/code/{id}
     """
     def name(self):
-        return self.g.objects(predicate=SCHEMA.name)[0]
+        for obj in self.g.objects(predicate=SCHEMA.name):
+            yield obj
 
 
     def identifier(self):
-        return self.g.objects(predicate=SCHEMA.identifier)
+        for obj in self.g.objects(predicate=SCHEMA.identifier):
+            yield obj

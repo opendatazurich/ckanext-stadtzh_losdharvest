@@ -3,6 +3,7 @@
 import logging
 
 import isodate
+import json
 import rdflib
 from ckan.lib.munge import munge_title_to_name
 from rdflib import Literal, URIRef
@@ -13,6 +14,7 @@ from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
 
+from processors import LosdCodeParser
 from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
@@ -119,7 +121,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         )
 
         # Attributes
-        dataset_dict['sszFields'] = self._get_attributes(dataset_ref)
+        dataset_dict['sszFields'] = self._json_encode_attributes(
+            self._get_attributes(dataset_ref))
 
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
@@ -192,6 +195,16 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 return ""
         return ""
 
+    def _json_encode_attributes(self, properties):
+        # todo: Uncomment these lines once the LOSD source includes
+        # descriptions for attributes.
+        # attributes = []
+        # for key, value in properties:
+        #     if value:
+        #         attributes.append((key, value))
+
+        return json.dumps(properties)
+
     def _get_attributes(self, dataset_ref):
         """Get the attributes for the dataset out of the dimensions"""
         attributes = []
@@ -208,11 +221,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 content, content_type = get_content_and_type(code_url[0])
             except RuntimeError as e:
                 log.info(e)
+                continue
 
             parser = LosdCodeParser()
             parser.parse(content, content_type)
-            tech_name = parser.identifier()
-            speak_name = parser.name()
+            tech_name = parser.identifier().next()
+            speak_name = parser.name().next()
 
             if tech_name:
                 attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
