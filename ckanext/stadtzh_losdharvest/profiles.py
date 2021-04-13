@@ -312,7 +312,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             else:
                 resource_dict["url_type"] = "api"
                 # Todo: remove this line once we are using the custom solr config locally
-                resource_dict["format"] = "CSV"
+                # resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "api"
 
             resource_list.append(resource_dict)
