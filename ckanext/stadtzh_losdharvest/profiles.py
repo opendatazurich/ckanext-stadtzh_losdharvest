@@ -194,8 +194,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return ""
 
     def _json_encode_attributes(self, properties):
-        # todo: Uncomment these lines once the LOSD source includes
-        # descriptions for attributes.
+        # todo: Uncomment these lines once the LOSD source includes descriptions for attributes.
         # attributes = []
         # for key, value in properties:
         #     if value:
@@ -223,10 +222,23 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
             parser = LosdCodeParser()
             parser.parse(content, content_type)
-            tech_name = parser.identifier().next()
-            speak_name = parser.name().next()
 
-            if tech_name:
+            name = ''
+            for name in parser.name():
+                speak_name = name
+                break
+
+            tech_name = ''
+            for identifier in parser.identifier():
+                tech_name = identifier
+                break
+
+            description = ''
+            for desc in parser.description():
+                description = desc
+                break
+
+            if tech_name != '':
                 attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
             else:
                 attribute_name = speak_name
@@ -234,11 +246,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
             attributes.append(
                 (
                     attribute_name,
-                    ''  # This would be the description, but we don't get one
+                    description
                 )
             )
 
-        return attributes
+        return list(set(attributes))
 
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
