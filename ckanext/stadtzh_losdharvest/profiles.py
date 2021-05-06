@@ -3,14 +3,18 @@
 import logging
 
 import isodate
+import json
 import rdflib
-from ckan.lib.munge import munge_title_to_name
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
+from ckan.lib.munge import munge_tag, munge_title_to_name
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
+
+from processors import LosdCodeParser, LosdPublisherParser, LosdDatasetParser
+from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +33,7 @@ TIME = Namespace("http://www.w3.org/2006/time#")
 DOAP = Namespace("http://usefulinc.com/ns/doap#")
 DUV = Namespace("http://www.w3.org/ns/duv#")
 WD = Namespace("http://www.wikidata.org/entity/")
-CUBE = Namespace("http://ns.bergnet.org/cube/")
+CUBE = Namespace("https://cube.link/view/")
 
 namespaces = {
     "base": BASE,
@@ -102,8 +106,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         if publishers:
             dataset_dict["author"] = publishers[0]
 
-        # Tags
-        dataset_dict["tags"] = self._get_tags(dataset_ref)
+        # Tags, notes and timeRange come from the dataset, referenced
+        # from the view by SCHEMA.isBasedOn
+        dataset_dict.update(self._get_based_on_fields(dataset_ref))
 
         # license
         dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
@@ -114,6 +119,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
         )
+
+        # Attributes
+        dataset_dict['sszFields'] = self._json_encode_attributes(
+            self._get_attributes(dataset_ref))
 
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
@@ -126,38 +135,55 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """
         Get publishers for a dataset.
         """
+        publishers = []
         publisher_refs = self._get_object_refs_for_subject_predicate(
             dataset_ref, SCHEMA.publisher
         )
-        publishers = [
-            self._object_value(ref, SCHEMA.name) for ref in publisher_refs
-        ]
+        for ref in publisher_refs:
+            content, content_type = get_content_and_type(ref)
+            parser = LosdPublisherParser()
+            parser.parse(content, content_type)
+            for publisher in parser.name():
+                publishers.append(publisher)
+
         return publishers
 
-    def _get_tags(self, dataset_ref):
-        """get all tags for a dataset"""
-        keyword_refs = self._get_keyword_refs_for_dataset_ref(dataset_ref)
+    def _get_based_on_fields(self, dataset_ref):
+        notes = ''
+        tags = []
+        time_range = ''
+        based_on_refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, SCHEMA.isBasedOn
+        )
+        for ref in based_on_refs:
+            content, content_type = get_content_and_type(ref)
+            parser = LosdDatasetParser()
+            parser.parse(content, content_type)
+
+            for description in parser.description():
+                notes = description
+                break
+            for tr in parser.time_range():
+                time_range = tr
+                break
+
+            for keyword in parser.keyword():
+                tags.append(keyword)
+            tags = self._process_tags(tags)
+
+        return {
+            "notes": notes,
+            "tags": tags,
+            "timeRange": time_range
+        }
+
+    def _process_tags(self, keyword_refs):
+        """Process keyword refs to a list of dicts"""
         keywords = [
             self._get_value_from_literal_or_uri(ref) for ref in keyword_refs
         ]
-        tags = [{"name": tag} for tag in keywords]
+        tags = [{"name": munge_tag(tag)} for tag in keywords]
         return tags
-
-    def _get_keyword_refs_for_dataset_ref(self, dataset_ref):
-        """get all keyword_refs for a dataset"""
-        keyword_refs = []
-        subjects = self._get_resource_refs_for_dataset_ref(dataset_ref)
-        subjects.append(dataset_ref)
-        for subject in subjects:
-            keyword_refs.extend(
-                [
-                    k
-                    for k in self.g.objects(
-                        subject=subject, predicate=DCAT.keyword
-                    )
-                ]
-            )
-        return keyword_refs
 
     def _get_license_code_for_dataset_ref(self, dataset_ref):
         """Get license for a dataset ref"""
@@ -180,19 +206,73 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 return ""
         return ""
 
+    def _json_encode_attributes(self, properties):
+        # todo: Uncomment these lines once the LOSD source includes
+        # descriptions for attributes.
+        # attributes = []
+        # for key, value in properties:
+        #     if value:
+        #         attributes.append((key, value))
+
+        return json.dumps(properties)
+
+    def _get_attributes(self, dataset_ref):
+        """Get the attributes for the dataset out of the dimensions"""
+        attributes = []
+        refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, CUBE.dimension
+        )
+        for ref in refs:
+            # Setting the predicate like this because `CUBE.as` produced
+            # a Python error :(
+            code_url = self._get_object_refs_for_subject_predicate(
+                ref, rdflib.term.URIRef(u'https://cube.link/view/as'))
+
+            try:
+                content, content_type = get_content_and_type(code_url[0])
+            except RuntimeError as e:
+                log.info(e)
+                continue
+
+            parser = LosdCodeParser()
+            parser.parse(content, content_type)
+
+            name = ''
+            for name in parser.name():
+                speak_name = name
+                break
+
+            tech_name = ''
+            for identifier in parser.identifier():
+                tech_name = identifier
+                break
+
+            description = ''
+            for desc in parser.description():
+                description = desc
+                break
+
+            if tech_name != '':
+                attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
+            else:
+                attribute_name = speak_name
+
+            attributes.append(
+                (
+                    attribute_name,
+                    description
+                )
+            )
+
+        return list(set(attributes))
+
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""
-        resource_rights_refs = []
-        for resource_ref in self._get_resource_refs_for_dataset_ref(
-            dataset_ref
-        ):
-            refs = self._get_object_refs_for_subject_predicate(
-                resource_ref, DCTERMS.rights
-            )
-            if refs:
-                resource_rights_refs.extend(refs)
-        if resource_rights_refs:
-            dataset_rights_ref = resource_rights_refs[0]
+        refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, DCTERMS.rights
+        )
+        if refs:
+            dataset_rights_ref = refs[0]
             rights_statement_refs = \
                 self._get_object_refs_for_subject_predicate(
                     dataset_rights_ref, SCHEMA.name
@@ -226,25 +306,29 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref, DCAT.distribution
         ):
             resource_dict = {}
-            for key, predicate in (("url", DCAT.downloadURL),):
+            # For some reason, DCTERMS.format does not work so we have to
+            # use the explicit URIRef here.
+            for key, predicate in (
+                    ("url", DCAT.downloadURL),
+                    ("format", rdflib.term.URIRef(u'http://purl.org/dc/terms/format')),  # noqa
+                    ("mimetype", DCAT.mediaType),
+            ):
                 value = self._object_value(resource_ref, predicate)
                 if value:
                     resource_dict[key] = value
             if not resource_dict.get("name"):
                 resource_dict["name"] = dataset_dict["name"]
-            resource_dict["url_type"] = "upload"
-            resource_list.append(resource_dict)
 
-        for cube_ref in self._get_object_refs_for_subject_predicate(
-            dataset_ref, SCHEMA.hasPart
-        ):
-            resource_dict = {}
-            for key, predicate in (("name", SCHEMA.name),):
-                value = self._object_value(cube_ref, predicate)
-                if value:
-                    resource_dict[key] = value
-            resource_dict["url_type"] = "api"
-            resource_dict["url"] = dataset_dict.get("sparqlEndpoint")
+            if "csv" in resource_dict.get("mimetype"):
+                resource_dict["url_type"] = "file"
+                resource_dict["resource_type"] = "file"
+            else:
+                resource_dict["url_type"] = "api"
+                # Todo: remove this line once we are using the custom solr
+                # config locally
+                # resource_dict["format"] = "CSV"
+                resource_dict["resource_type"] = "api"
+
             resource_list.append(resource_dict)
 
         return resource_list
