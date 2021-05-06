@@ -2,14 +2,13 @@
 
 import json
 import logging
-import requests
 
 import ckan.plugins as p
+import requests
 
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 from ckanext.dcat.processors import RDFParserException
-
 from processors import LosdViewsParser
 
 log = logging.getLogger(__name__)
