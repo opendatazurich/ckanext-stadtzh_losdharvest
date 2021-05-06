@@ -5,16 +5,15 @@ import logging
 import isodate
 import json
 import rdflib
-from ckan.lib.munge import munge_title_to_name
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
-from ckanext.dcat.processors import RDFParser, RDFParserException
+from ckan.lib.munge import munge_tag, munge_title_to_name
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
 
-from processors import LosdCodeParser, LosdPublisherParser
+from processors import LosdCodeParser, LosdPublisherParser, LosdDatasetParser
 from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
@@ -107,8 +106,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
         if publishers:
             dataset_dict["author"] = publishers[0]
 
-        # Tags
-        dataset_dict["tags"] = self._get_tags(dataset_ref)
+        # Tags, notes and timeRange come from the dataset, referenced
+        # from the view by SCHEMA.isBasedOn
+        dataset_dict["notes"], dataset_dict["tags"], dataset_dict["timeRange"] =\
+            self._get_based_on_fields(dataset_ref)
 
         # license
         dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
@@ -147,30 +148,34 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return publishers
 
-    def _get_tags(self, dataset_ref):
-        """get all tags for a dataset"""
-        keyword_refs = self._get_keyword_refs_for_dataset_ref(dataset_ref)
+    def _get_based_on_fields(self, dataset_ref):
+        notes = ''
+        tags = []
+        time_range = ''
+        based_on_refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, SCHEMA.isBasedOn
+        )
+        for ref in based_on_refs:
+            content, content_type = get_content_and_type(ref)
+            parser = LosdDatasetParser()
+            parser.parse(content, content_type)
+
+            notes = parser.description().next()
+            time_range = parser.time_range().next()
+
+            for keyword in parser.keyword():
+                tags.append(keyword)
+            tags = self._process_tags(tags)
+
+        return notes, tags, time_range
+
+    def _process_tags(self, keyword_refs):
+        """Process keyword refs to a list of dicts"""
         keywords = [
             self._get_value_from_literal_or_uri(ref) for ref in keyword_refs
         ]
-        tags = [{"name": tag} for tag in keywords]
+        tags = [{"name": munge_tag(tag)} for tag in keywords]
         return tags
-
-    def _get_keyword_refs_for_dataset_ref(self, dataset_ref):
-        """get all keyword_refs for a dataset"""
-        keyword_refs = []
-        subjects = self._get_resource_refs_for_dataset_ref(dataset_ref)
-        subjects.append(dataset_ref)
-        for subject in subjects:
-            keyword_refs.extend(
-                [
-                    k
-                    for k in self.g.objects(
-                        subject=subject, predicate=DCAT.keyword
-                    )
-                ]
-            )
-        return keyword_refs
 
     def _get_license_code_for_dataset_ref(self, dataset_ref):
         """Get license for a dataset ref"""
@@ -251,7 +256,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
             )
 
         return list(set(attributes))
-
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref"""

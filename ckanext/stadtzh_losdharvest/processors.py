@@ -48,3 +48,19 @@ class LosdPublisherParser(RDFParser):
     def name(self):
         for obj in self.g.objects(predicate=SCHEMA.name):
             yield obj
+
+class LosdDatasetParser(RDFParser):
+    """Parses the data from a url like
+    https://ld.integ.stadt-zuerich.ch/statistics/view/D000002
+    """
+    def description(self):
+        for obj in self.g.objects(predicate=SCHEMA.description):
+            yield obj
+
+    def keyword(self):
+        for obj in self.g.objects(predicate=SCHEMA.keywords):
+            yield obj
+
+    def time_range(self):
+        for obj in self.g.objects(predicate=SCHEMA.temporalCoverage):
+            yield obj
