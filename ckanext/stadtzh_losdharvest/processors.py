@@ -23,6 +23,7 @@ class LosdViewsParser(RDFParser):
         for obj in self.g.objects(predicate=SCHEMA.dataset):
             yield obj
 
+
 class LosdCodeParser(RDFParser):
     """Parses the data from a url like
     https://ld.stadt-zuerich.ch/statistics/code/{id}
@@ -31,15 +32,14 @@ class LosdCodeParser(RDFParser):
         for obj in self.g.objects(predicate=SCHEMA.name):
             yield obj
 
-
     def identifier(self):
         for obj in self.g.objects(predicate=SCHEMA.identifier):
             yield obj
 
-
     def description(self):
         for obj in self.g.objects(predicate=SCHEMA.description):
             yield obj
+
 
 class LosdPublisherParser(RDFParser):
     """Parses the data from a url like
@@ -48,6 +48,7 @@ class LosdPublisherParser(RDFParser):
     def name(self):
         for obj in self.g.objects(predicate=SCHEMA.name):
             yield obj
+
 
 class LosdDatasetParser(RDFParser):
     """Parses the data from a url like

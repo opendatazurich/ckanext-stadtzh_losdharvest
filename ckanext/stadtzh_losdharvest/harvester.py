@@ -58,7 +58,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         try:
             if page > 1:
-                views_url = views_url + '&' if '?' in views_url else views_url + '?'
+                views_url = views_url + '&' if '?' in views_url else views_url + '?'  # noqa
                 views_url = views_url + 'page={0}'.format(page)
 
             log.debug('Getting file %s', views_url)
@@ -92,9 +92,9 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         results = ''
 
         for view_url in parser.views():
-            # Pass this UriRef to the parent _get_content_and_type method
+            # Pass this UriRef to the parent _get_content_and_type method,
             # get the content and concatenate it to existing content
-            view, view_type = super(DCATRDFHarvester, self)._get_content_and_type(
+            view, view_type = super(DCATRDFHarvester, self)._get_content_and_type(  # noqa
                 view_url, harvest_job)
             # log.warning(view)
             results += view

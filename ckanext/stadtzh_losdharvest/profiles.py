@@ -108,8 +108,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         # Tags, notes and timeRange come from the dataset, referenced
         # from the view by SCHEMA.isBasedOn
-        dataset_dict["notes"], dataset_dict["tags"], dataset_dict["timeRange"] =\
-            self._get_based_on_fields(dataset_ref)
+        dataset_dict.update(self._get_based_on_fields(dataset_ref))
 
         # license
         dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
@@ -167,7 +166,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 tags.append(keyword)
             tags = self._process_tags(tags)
 
-        return notes, tags, time_range
+        return {
+            "notes": notes,
+            "tags": tags,
+            "timeRange": time_range
+        }
 
     def _process_tags(self, keyword_refs):
         """Process keyword refs to a list of dicts"""
@@ -199,7 +202,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return ""
 
     def _json_encode_attributes(self, properties):
-        # todo: Uncomment these lines once the LOSD source includes descriptions for attributes.
+        # todo: Uncomment these lines once the LOSD source includes
+        # descriptions for attributes.
         # attributes = []
         # for key, value in properties:
         #     if value:
@@ -301,7 +305,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             # use the explicit URIRef here.
             for key, predicate in (
                     ("url", DCAT.downloadURL),
-                    ("format", rdflib.term.URIRef(u'http://purl.org/dc/terms/format')),
+                    ("format", rdflib.term.URIRef(u'http://purl.org/dc/terms/format')),  # noqa
                     ("mimetype", DCAT.mediaType),
             ):
                 value = self._object_value(resource_ref, predicate)
@@ -315,7 +319,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 resource_dict["resource_type"] = "file"
             else:
                 resource_dict["url_type"] = "api"
-                # Todo: remove this line once we are using the custom solr config locally
+                # Todo: remove this line once we are using the custom solr
+                # config locally
                 # resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "api"
 
