@@ -143,7 +143,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
             content, content_type = get_content_and_type(ref)
             parser = LosdPublisherParser()
             parser.parse(content, content_type)
-            publishers.append(parser.name().next())
+            for publisher in parser.name():
+                publishers.append(publisher)
 
         return publishers
 
@@ -159,8 +160,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
             parser = LosdDatasetParser()
             parser.parse(content, content_type)
 
-            notes = parser.description().next()
-            time_range = parser.time_range().next()
+            for description in parser.description():
+                notes = description
+                break
+            for tr in parser.time_range():
+                time_range = tr
+                break
 
             for keyword in parser.keyword():
                 tags.append(keyword)
