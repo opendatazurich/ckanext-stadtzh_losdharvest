@@ -1,19 +1,18 @@
 # coding=utf-8
 
+import json
 import logging
 
 import isodate
-import json
 import rdflib
+from ckan.lib.munge import munge_tag, munge_title_to_name
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
-from ckan.lib.munge import munge_tag, munge_title_to_name
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
-
-from processors import LosdCodeParser, LosdPublisherParser, LosdDatasetParser
+from processors import LosdCodeParser, LosdDatasetParser, LosdPublisherParser
 from utils import get_content_and_type
 
 log = logging.getLogger(__name__)

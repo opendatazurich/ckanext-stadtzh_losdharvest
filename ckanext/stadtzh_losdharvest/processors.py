@@ -2,6 +2,7 @@
 import logging
 
 from rdflib.namespace import Namespace
+
 from ckanext.dcat.processors import RDFParser
 
 log = logging.getLogger(__name__)
