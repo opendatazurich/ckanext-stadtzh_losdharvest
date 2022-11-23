@@ -6,6 +6,7 @@ import logging
 import isodate
 import rdflib
 from ckan.lib.munge import munge_tag
+from markdownify import markdownify as md
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
@@ -96,8 +97,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         dataset_dict["name"] = self._object_value(
             dataset_ref, SCHEMA.alternateName).lower()
-        dataset_dict["notes"] = self._object_value(
-            dataset_ref, SCHEMA.alternateName)  # todo: html->markdown
+        dataset_dict["notes"] = md(self._object_value(
+            dataset_ref, SCHEMA.alternateName))
+        dataset_dict["sssBemerkungen"] = md(self._object_value(
+            dataset_ref, BASE.usageNotes))
 
         # todo: groups: DCAT.theme -> search for group with this title
         # todo: tags: DCAT:keyword -> split by ','
@@ -122,7 +125,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
         )
-        # todo: sssBemerkungen: BASE.usageNotes, html->markdown
 
         # Attributes
         dataset_dict['sszFields'] = self._json_encode_attributes(
