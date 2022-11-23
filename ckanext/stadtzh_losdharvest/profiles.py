@@ -106,6 +106,17 @@ class StadtzhLosdDcatProfile(RDFProfile):
             {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)]
         dataset_dict["groups"] = self._get_groups_for_dataset_ref(dataset_ref)
 
+        dataset_dict["maintainer"] = "Open Data Zürich"
+        dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
+
+        publishers = self._get_publishers_for_dataset_ref(dataset_ref)
+        if publishers:
+            dataset_dict["author"] = dataset_dict["url"] = publishers[0]
+
+        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
+            dataset_ref
+        )
+
         # Date fields
         for key, predicate in (
             ("dateFirstPublished", DCTERMS.issued),
@@ -127,17 +138,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         if start_date or end_date:
             dataset_dict['timeRange'] = ' '.join(time_range_parts)
-
-        dataset_dict["maintainer"] = "Open Data Zürich"
-        dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
-
-        publishers = self._get_publishers_for_dataset_ref(dataset_ref)
-        if publishers:
-            dataset_dict["author"] = dataset_dict["url"] = publishers[0]
-
-        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
-            dataset_ref
-        )
 
         # Attributes
         dataset_dict['sszFields'] = self._json_encode_attributes(
