@@ -16,7 +16,6 @@ from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_get_group_names
 from processors import (
     LosdCodeParser,
-    LosdDatasetParser,
     LosdLegalFoundationParser,
     LosdPublisherParser)
 from utils import get_content_and_type
@@ -130,7 +129,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         time_range_parts = []
         start_date = self._object_value(dataset_ref, SCHEMA.startDate)
         if start_date:
-            time_range_parts.append(self._format_datetime_as_string(start_date))
+            time_range_parts.append(
+                self._format_datetime_as_string(start_date))
         time_range_parts.append('-')
         end_date = self._object_value(dataset_ref, SCHEMA.endDate)
         if end_date:
