@@ -5,14 +5,18 @@ import logging
 
 import isodate
 import rdflib
-from ckan.lib.munge import munge_tag, munge_title_to_name
+from ckan.lib.munge import munge_tag
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
     stadtzhharvest_find_or_create_organization
-from processors import LosdCodeParser, LosdDatasetParser, LosdPublisherParser
+from processors import (
+    LosdCodeParser,
+    LosdDatasetParser,
+    LosdLegalFoundationParser,
+    LosdPublisherParser)
 from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
@@ -81,43 +85,47 @@ class StadtzhLosdDcatProfile(RDFProfile):
         # Basic fields
         for key, predicate in (
             ("title", SCHEMA.name),
-            ("notes", SCHEMA.description),
             ("sparqlEndpoint", VOID.sparqlEndpoint),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = value
 
+        dataset_dict["name"] = self._object_value(
+            dataset_ref, SCHEMA.alternateName).lower()
+        dataset_dict["notes"] = self._object_value(
+            dataset_ref, SCHEMA.alternateName)  # todo: html->markdown
+
+        # todo: groups: DCAT.theme
+        # todo: tags: DCAT:keyword
+
         # Date fields
         for key, predicate in (
-            ("dateFirstPublished", SCHEMA.dateCreated),
-            ("dateLastUpdated", SCHEMA.dateModified),
+            ("dateFirstPublished", DCTERMS.issued),
+            ("dateLastUpdated", DCTERMS.modified),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = self._format_datetime_as_string(value)
+        # todo: timeRange: SCHEMA.startDate + SCHEMA.endDate
+        # todo: updateInterval: accrualPeriodicity
+
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
-        dataset_dict["name"] = munge_title_to_name(dataset_dict["title"])
 
-        # publishers
         publishers = self._get_publishers_for_dataset_ref(dataset_ref)
         if publishers:
             dataset_dict["author"] = publishers[0]
+            # todo: url: DCTERMS.publisher
 
-        # Tags, notes and timeRange come from the dataset, referenced
-        # from the view by SCHEMA.isBasedOn
-        dataset_dict.update(self._get_based_on_fields(dataset_ref))
-
-        # license
         dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
             dataset_ref
         )
-
-        # rights
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
         )
+        # todo: spatialRelationship: DCTERMS.spatial
+        # todo: sssBemerkungen: BASE.usageNotes
 
         # Attributes
         dataset_dict['sszFields'] = self._json_encode_attributes(
@@ -186,23 +194,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
     def _get_license_code_for_dataset_ref(self, dataset_ref):
         """Get license for a dataset ref"""
-        license_refs = []
-        for resource_ref in self._get_resource_refs_for_dataset_ref(
-            dataset_ref
-        ):
-            license_ref = self._get_object_refs_for_subject_predicate(
-                resource_ref, SCHEMA.license
-            )
-            if license_ref:
-                license_refs.extend(license_ref)
+        license_refs = self._get_object_refs_for_subject_predicate(
+            dataset_ref, DCTERMS.license
+        )
         if license_refs:
-            license_ref = license_refs[0]
-            license = self._get_value_from_literal_or_uri(license_ref)
-            try:
-                license_code = LICENSE_MAPPING_FOR_LOSD[license]
-                return license_code
-            except KeyError:
-                return ""
+            license = self._get_value_from_literal_or_uri(license_refs[0])
+            return license
         return ""
 
     def _json_encode_attributes(self, properties):
@@ -266,22 +263,17 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return list(set(attributes))
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
-        """Get rights statement for a dataset ref"""
+        """Get rights statement for a dataset ref
+        """
         refs = self._get_object_refs_for_subject_predicate(
-            dataset_ref, DCTERMS.rights
+            dataset_ref, BASE.legalFoundation
         )
         if refs:
             dataset_rights_ref = refs[0]
-            rights_statement_refs = \
-                self._get_object_refs_for_subject_predicate(
-                    dataset_rights_ref, SCHEMA.name
-                )
-            if rights_statement_refs:
-                rights_statement_ref = rights_statement_refs[0]
-                rights_statement = self._get_value_from_literal_or_uri(
-                    rights_statement_ref
-                )
-                return rights_statement
+            content, content_type = get_content_and_type(dataset_rights_ref)
+            parser = LosdLegalFoundationParser()
+            parser.parse(content, content_type)
+            # TODO: get necessary data and return it
         return ""
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
