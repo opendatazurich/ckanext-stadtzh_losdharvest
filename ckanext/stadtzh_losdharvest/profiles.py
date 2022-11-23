@@ -5,14 +5,15 @@ import logging
 
 import isodate
 import rdflib
-from ckan.lib.munge import munge_tag
+from ckan.lib.munge import munge_tag, munge_title_to_name
 from markdownify import markdownify as md
 from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
 from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzhharvest.utils import \
-    stadtzhharvest_find_or_create_organization
+    stadtzhharvest_find_or_create_organization, \
+    stadtzhharvest_get_group_names
 from processors import (
     LosdCodeParser,
     LosdDatasetParser,
@@ -101,9 +102,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref, SCHEMA.alternateName))
         dataset_dict["sssBemerkungen"] = md(self._object_value(
             dataset_ref, BASE.usageNotes))
-
-        # todo: groups: DCAT.theme -> search for group with this title
-        # todo: tags: DCAT:keyword -> split by ','
+        dataset_dict["tags"] = [
+            {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)]
+        dataset_dict["groups"] = self._get_groups_for_dataset_ref(dataset_ref)
 
         # Date fields
         for key, predicate in (
@@ -166,42 +167,13 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return publishers
 
-    def _get_based_on_fields(self, dataset_ref):
-        notes = ''
-        tags = []
-        time_range = ''
-        based_on_refs = self._get_object_refs_for_subject_predicate(
-            dataset_ref, SCHEMA.isBasedOn
-        )
-        for ref in based_on_refs:
-            content, content_type = get_content_and_type(ref)
-            parser = LosdDatasetParser()
-            parser.parse(content, content_type)
-
-            for description in parser.description():
-                notes = description
-                break
-            for tr in parser.time_range():
-                time_range = tr
-                break
-
-            for keyword in parser.keyword():
-                tags.append(keyword)
-            tags = self._process_tags(tags)
-
-        return {
-            "notes": notes,
-            "tags": tags,
-            "timeRange": time_range
-        }
-
-    def _process_tags(self, keyword_refs):
-        """Process keyword refs to a list of dicts"""
-        keywords = [
-            self._get_value_from_literal_or_uri(ref) for ref in keyword_refs
-        ]
-        tags = [{"name": munge_tag(tag)} for tag in keywords]
-        return tags
+    def _get_groups_for_dataset_ref(self, dataset_ref):
+        groups = []
+        group_titles = self._object_value_list(dataset_ref, DCAT.theme)
+        for title in group_titles:
+            name = munge_title_to_name(title)
+            groups.append((name, title))
+        return stadtzhharvest_get_group_names(groups)
 
     def _json_encode_attributes(self, properties):
         # todo: Uncomment these lines once the LOSD source includes
