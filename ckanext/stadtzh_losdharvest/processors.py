@@ -51,6 +51,16 @@ class LosdPublisherParser(RDFParser):
             yield obj
 
 
+class LosdLegalFoundationParser(RDFParser):
+    """Parses the data from a url like
+    https://ld.integ.stadt-zuerich.ch/statistics/meta/legal/
+    TODO: fill in methods for this parser once we know what legalFoundation looks like
+    """
+    def name(self):
+        for obj in self.g.objects(predicate=SCHEMA.name):
+            yield obj
+
+
 class LosdDatasetParser(RDFParser):
     """Parses the data from a url like
     https://ld.integ.stadt-zuerich.ch/statistics/view/D000002
