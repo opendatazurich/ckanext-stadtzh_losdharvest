@@ -85,7 +85,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
         # Basic fields
         for key, predicate in (
             ("title", SCHEMA.name),
+            ("spatialRelationship", DCTERMS.spatial),
             ("sparqlEndpoint", VOID.sparqlEndpoint),
+            ("updateInterval", DCTERMS.accrualPeriodicity),
+            ("license_id", DCTERMS.license),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -96,8 +99,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["notes"] = self._object_value(
             dataset_ref, SCHEMA.alternateName)  # todo: html->markdown
 
-        # todo: groups: DCAT.theme
-        # todo: tags: DCAT:keyword
+        # todo: groups: DCAT.theme -> search for group with this title
+        # todo: tags: DCAT:keyword -> split by ','
 
         # Date fields
         for key, predicate in (
@@ -107,25 +110,19 @@ class StadtzhLosdDcatProfile(RDFProfile):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = self._format_datetime_as_string(value)
-        # todo: timeRange: SCHEMA.startDate + SCHEMA.endDate
-        # todo: updateInterval: accrualPeriodicity
+        # todo: timeRange: SCHEMA.startDate - SCHEMA.endDate
 
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
 
         publishers = self._get_publishers_for_dataset_ref(dataset_ref)
         if publishers:
-            dataset_dict["author"] = publishers[0]
-            # todo: url: DCTERMS.publisher
+            dataset_dict["author"] = dataset_dict["url"] = publishers[0]
 
-        dataset_dict["license_id"] = self._get_license_code_for_dataset_ref(
-            dataset_ref
-        )
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
         )
-        # todo: spatialRelationship: DCTERMS.spatial
-        # todo: sssBemerkungen: BASE.usageNotes
+        # todo: sssBemerkungen: BASE.usageNotes, html->markdown
 
         # Attributes
         dataset_dict['sszFields'] = self._json_encode_attributes(
@@ -191,16 +188,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
         ]
         tags = [{"name": munge_tag(tag)} for tag in keywords]
         return tags
-
-    def _get_license_code_for_dataset_ref(self, dataset_ref):
-        """Get license for a dataset ref"""
-        license_refs = self._get_object_refs_for_subject_predicate(
-            dataset_ref, DCTERMS.license
-        )
-        if license_refs:
-            license = self._get_value_from_literal_or_uri(license_refs[0])
-            return license
-        return ""
 
     def _json_encode_attributes(self, properties):
         # todo: Uncomment these lines once the LOSD source includes
