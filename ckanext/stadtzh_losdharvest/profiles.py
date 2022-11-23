@@ -113,7 +113,19 @@ class StadtzhLosdDcatProfile(RDFProfile):
             value = self._object_value(dataset_ref, predicate)
             if value:
                 dataset_dict[key] = self._format_datetime_as_string(value)
-        # todo: timeRange: SCHEMA.startDate - SCHEMA.endDate
+
+        # Construct timeRange out of the dataset's startDate and endDate.
+        time_range_parts = []
+        start_date = self._object_value(dataset_ref, SCHEMA.startDate)
+        if start_date:
+            time_range_parts.append(self._format_datetime_as_string(start_date))
+        time_range_parts.append('-')
+        end_date = self._object_value(dataset_ref, SCHEMA.endDate)
+        if end_date:
+            time_range_parts.append(self._format_datetime_as_string(end_date))
+
+        if start_date or end_date:
+            dataset_dict['timeRange'] = ' '.join(time_range_parts)
 
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
