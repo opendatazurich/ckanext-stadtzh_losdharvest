@@ -109,9 +109,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
 
-        publishers = self._get_publishers_for_dataset_ref(dataset_ref)
+        publishers = self._get_publisher_for_dataset_ref(dataset_ref)
         if publishers:
-            dataset_dict["author"] = dataset_dict["url"] = publishers[0]
+            dataset_dict["url"] = publishers[0]
 
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
@@ -151,20 +151,17 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return dataset_dict
 
-    def _get_publishers_for_dataset_ref(self, dataset_ref):
+    def _get_publisher_for_dataset_ref(self, dataset_ref):
         """
         Get publishers for a dataset.
         """
         publishers = []
-        publisher_refs = self._get_object_refs_for_subject_predicate(
-            dataset_ref, SCHEMA.publisher
-        )
-        for ref in publisher_refs:
-            content, content_type = get_content_and_type(ref)
-            parser = LosdPublisherParser()
-            parser.parse(content, content_type)
-            for publisher in parser.name():
-                publishers.append(publisher)
+        publisher_ref = self._object_value(dataset_ref, DCTERMS.publisher)
+        content, content_type = get_content_and_type(publisher_ref)
+        parser = LosdParser()
+        parser.parse(content, content_type)
+        for publisher in parser.name():
+            publishers.append(publisher)
 
         return publishers
 
