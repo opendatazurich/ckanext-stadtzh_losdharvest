@@ -184,13 +184,13 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_attributes(self, dataset_ref):
         """Get the attributes for the dataset out of the dimensions"""
         attributes = []
-        refs = self._get_object_refs_for_subject_predicate(
+        refs = self._object_value_list(
             dataset_ref, CUBE.dimension
         )
         for ref in refs:
             # Setting the predicate like this because `CUBE.as` produced
             # a Python error :(
-            code_url = self._get_object_refs_for_subject_predicate(
+            code_url = self._object_value_list(
                 ref, rdflib.term.URIRef(u'https://cube.link/view/as'))
 
             try:
@@ -234,7 +234,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref
         """
-        refs = self._get_object_refs_for_subject_predicate(
+        refs = self._object_value_list(
             dataset_ref, BASE.legalFoundation
         )
         if refs:
@@ -247,11 +247,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
     def _get_resource_refs_for_dataset_ref(self, dataset_ref):
         """return all resource refs for a dataset as a list"""
-        resource_refs = self._get_object_refs_for_subject_predicate(
+        resource_refs = self._object_value_list(
             dataset_ref, DCAT.distribution
         )
         resource_refs.extend(
-            self._get_object_refs_for_subject_predicate(
+            self._object_value_list(
                 dataset_ref, SCHEMA.hasPart
             )
         )
@@ -262,7 +262,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         get resources for the dataset: dcat:distributions or cube:Cube
         """
         resource_list = []
-        for resource_ref in self._get_object_refs_for_subject_predicate(
+        for resource_ref in self._object_value_list(
             dataset_ref, DCAT.distribution
         ):
             resource_dict = {}
@@ -292,12 +292,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
             resource_list.append(resource_dict)
 
         return resource_list
-
-    def _get_object_refs_for_subject_predicate(self, subject_ref, predicate):
-        """get all objects refs for a subject and predicate combination"""
-        return [
-            o for o in self.g.objects(subject=subject_ref, predicate=predicate)
-        ]
 
     def _get_value_from_literal_or_uri(self, ref):
         """gets value from literal"""
