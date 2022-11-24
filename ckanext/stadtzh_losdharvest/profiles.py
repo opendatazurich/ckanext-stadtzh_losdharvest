@@ -18,7 +18,8 @@ from ckanext.stadtzhharvest.utils import (
 
 log = logging.getLogger(__name__)
 
-BASE = Namespace("https://ld.stadt-zuerich.ch/")
+BASE = Namespace("https://ld.stadt-zuerich.ch/schema/")
+BASEINT = Namespace("https://ld.integ.stadt-zuerich.ch/schema/")
 QUDT = Namespace("http://qudt.org/schema/qudt#")
 VOID = Namespace("http://rdfs.org/ns/void#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
@@ -37,6 +38,7 @@ CUBE = Namespace("https://cube.link/view/")
 
 namespaces = {
     "base": BASE,
+    "baseint": BASEINT,
     "qudt": QUDT,
     "void": VOID,
     "rdf": RDF,
@@ -95,8 +97,11 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_ref, SCHEMA.alternateName).lower()
         dataset_dict["notes"] = md(self._object_value(
             dataset_ref, SCHEMA.alternateName))
-        dataset_dict["sssBemerkungen"] = md(self._object_value(
-            dataset_ref, BASE.usageNotes))
+        dataset_dict["sszBemerkungen"] = md(
+            self._object_value_from_losd_predicate(
+                dataset_ref, "usageNotes"
+            )
+        )
         dataset_dict["tags"] = [
             {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)]
         dataset_dict["groups"] = self._get_groups_for_dataset_ref(dataset_ref)
@@ -292,6 +297,16 @@ class StadtzhLosdDcatProfile(RDFProfile):
             resource_list.append(resource_dict)
 
         return resource_list
+
+    def _object_value_from_losd_predicate(self, ref, predicate_name):
+        """Get the object value with this subject and predicate name, where
+        the predicate is defined in either the SSZ LD namespace, or the INTEG
+        SSZ LD namespace.
+        """
+        value = self._object_value(ref, BASE[predicate_name]) or \
+            self._object_value(ref, BASEINT[predicate_name])
+
+        return value
 
     def _get_value_from_literal_or_uri(self, ref):
         """gets value from literal"""
