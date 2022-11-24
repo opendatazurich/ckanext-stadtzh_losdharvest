@@ -9,7 +9,7 @@ import requests
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 from ckanext.dcat.processors import RDFParserException
-from processors import LosdViewsParser
+from ckanext.stadtzh_losdharvest.processors import LosdViewsParser
 
 log = logging.getLogger(__name__)
 

@@ -11,11 +11,12 @@ from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
 from ckanext.dcat.profiles import RDFProfile
+from ckanext.stadtzh_losdharvest.processors import (LosdCodeParser,
+                                                    LosdLegalFoundationParser,
+                                                    LosdPublisherParser)
+from ckanext.stadtzh_losdharvest.utils import get_content_and_type
 from ckanext.stadtzhharvest.utils import (
     stadtzhharvest_find_or_create_organization, stadtzhharvest_get_group_names)
-from processors import (LosdCodeParser, LosdLegalFoundationParser,
-                        LosdPublisherParser)
-from utils import get_content_and_type
 
 log = logging.getLogger(__name__)
 
