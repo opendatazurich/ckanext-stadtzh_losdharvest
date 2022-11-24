@@ -11,9 +11,7 @@ from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
 from ckanext.dcat.profiles import RDFProfile
-from ckanext.stadtzh_losdharvest.processors import (LosdCodeParser,
-                                                    LosdLegalFoundationParser,
-                                                    LosdPublisherParser)
+from ckanext.stadtzh_losdharvest.processors import LosdCodeParser, LosdParser
 from ckanext.stadtzh_losdharvest.utils import get_content_and_type
 from ckanext.stadtzhharvest.utils import (
     stadtzhharvest_find_or_create_organization, stadtzhharvest_get_group_names)
@@ -242,7 +240,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         if refs:
             dataset_rights_ref = refs[0]
             content, content_type = get_content_and_type(dataset_rights_ref)
-            parser = LosdLegalFoundationParser()
+            parser = LosdParser()
             parser.parse(content, content_type)
             # TODO: get necessary data and return it
         return ""

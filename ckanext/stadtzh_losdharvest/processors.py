@@ -10,9 +10,16 @@ log = logging.getLogger(__name__)
 SCHEMA = Namespace("http://schema.org/")
 
 
-class LosdViewsParser(RDFParser):
+class LosdParser(RDFParser):
+    """Basic parser for LOSD pages.
     """
-    Parses the page that lists views to import.
+    def name(self):
+        for obj in self.g.objects(predicate=SCHEMA.name):
+            yield obj
+
+
+class LosdViewsParser(LosdParser):
+    """Parses the page that lists views to import.
     """
     def views(self):
         '''
@@ -25,14 +32,10 @@ class LosdViewsParser(RDFParser):
             yield obj
 
 
-class LosdCodeParser(RDFParser):
+class LosdCodeParser(LosdParser):
     """Parses the data from a url like
     https://ld.stadt-zuerich.ch/statistics/code/{id}
     """
-    def name(self):
-        for obj in self.g.objects(predicate=SCHEMA.name):
-            yield obj
-
     def identifier(self):
         for obj in self.g.objects(predicate=SCHEMA.identifier):
             yield obj
@@ -42,27 +45,7 @@ class LosdCodeParser(RDFParser):
             yield obj
 
 
-class LosdPublisherParser(RDFParser):
-    """Parses the data from a url like
-    https://ld.stadt-zuerich.ch/org/SSZ
-    """
-    def name(self):
-        for obj in self.g.objects(predicate=SCHEMA.name):
-            yield obj
-
-
-class LosdLegalFoundationParser(RDFParser):
-    """Parses the data from a url like
-    https://ld.integ.stadt-zuerich.ch/statistics/meta/legal/
-    TODO: fill in methods for this parser once we know what legalFoundation
-    looks like
-    """
-    def name(self):
-        for obj in self.g.objects(predicate=SCHEMA.name):
-            yield obj
-
-
-class LosdDatasetParser(RDFParser):
+class LosdDatasetParser(LosdParser):
     """Parses the data from a url like
     https://ld.integ.stadt-zuerich.ch/statistics/view/D000002
     """
