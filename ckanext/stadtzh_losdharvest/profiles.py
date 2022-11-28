@@ -7,11 +7,10 @@ import isodate
 import rdflib
 from ckan.lib.munge import munge_tag, munge_title_to_name
 from markdownify import markdownify as md
-from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
 from ckanext.dcat.profiles import RDFProfile
-from ckanext.stadtzh_losdharvest.processors import LosdCodeParser, LosdParser
+from ckanext.stadtzh_losdharvest.processors import LosdParser
 from ckanext.stadtzh_losdharvest.utils import get_content_and_type
 from ckanext.stadtzhharvest.utils import (
     stadtzhharvest_find_or_create_organization, stadtzhharvest_get_group_names)
@@ -264,15 +263,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
             self._object_value(ref, BASEINT[predicate_name])
 
         return value
-
-    def _get_value_from_literal_or_uri(self, ref):
-        """gets value from literal"""
-        if isinstance(ref, Literal):
-            return unicode(ref)
-        elif isinstance(ref, URIRef):
-            return ref
-        else:
-            return ""
 
     def _format_datetime_as_string(self, value):
         try:

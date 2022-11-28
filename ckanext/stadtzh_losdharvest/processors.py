@@ -30,33 +30,3 @@ class LosdViewsParser(LosdParser):
         '''
         for obj in self.g.objects(predicate=SCHEMA.dataset):
             yield obj
-
-
-class LosdCodeParser(LosdParser):
-    """Parses the data from a url like
-    https://ld.stadt-zuerich.ch/statistics/code/{id}
-    """
-    def identifier(self):
-        for obj in self.g.objects(predicate=SCHEMA.identifier):
-            yield obj
-
-    def description(self):
-        for obj in self.g.objects(predicate=SCHEMA.description):
-            yield obj
-
-
-class LosdDatasetParser(LosdParser):
-    """Parses the data from a url like
-    https://ld.integ.stadt-zuerich.ch/statistics/view/D000002
-    """
-    def description(self):
-        for obj in self.g.objects(predicate=SCHEMA.description):
-            yield obj
-
-    def keyword(self):
-        for obj in self.g.objects(predicate=SCHEMA.keywords):
-            yield obj
-
-    def time_range(self):
-        for obj in self.g.objects(predicate=SCHEMA.temporalCoverage):
-            yield obj
