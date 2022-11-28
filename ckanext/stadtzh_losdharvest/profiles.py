@@ -96,7 +96,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["name"] = self._object_value(
             dataset_ref, SCHEMA.alternateName).lower()
         dataset_dict["notes"] = md(self._object_value(
-            dataset_ref, SCHEMA.alternateName))
+            dataset_ref, SCHEMA.description))
         dataset_dict["sszBemerkungen"] = md(
             self._object_value_from_losd_predicate(
                 dataset_ref, "usageNotes"
