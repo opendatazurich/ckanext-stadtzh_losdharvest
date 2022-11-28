@@ -224,32 +224,18 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return ""
 
-    def _get_resource_refs_for_dataset_ref(self, dataset_ref):
-        """return all resource refs for a dataset as a list"""
-        resource_refs = self._object_value_list(
-            dataset_ref, DCAT.distribution
-        )
-        resource_refs.extend(
-            self._object_value_list(
-                dataset_ref, SCHEMA.hasPart
-            )
-        )
-        return resource_refs
-
     def _build_resources_dict(self, dataset_ref, dataset_dict):
-        """
-        get resources for the dataset: dcat:distributions or cube:Cube
+        """Get resources for the dataset.
         """
         resource_list = []
-        for resource_ref in self._object_value_list(
-            dataset_ref, DCAT.distribution
-        ):
+        for resource_ref in self.g.objects(dataset_ref, DCAT.distribution):
             resource_dict = {}
             # For some reason, DCTERMS.format does not work so we have to
             # use the explicit URIRef here.
             for key, predicate in (
                     ("url", DCAT.downloadURL),
-                    ("format", rdflib.term.URIRef(u'http://purl.org/dc/terms/format')),  # noqa
+                    ("format", rdflib.term.URIRef(
+                        u'http://purl.org/dc/terms/format')),
                     ("mimetype", DCAT.mediaType),
             ):
                 value = self._object_value(resource_ref, predicate)
@@ -263,11 +249,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 resource_dict["resource_type"] = "file"
             else:
                 resource_dict["url_type"] = "api"
-                # Todo: remove this line once we are using the custom solr
-                # config locally
-                # resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "api"
-            log.warning(resource_dict)
 
             resource_list.append(resource_dict)
 
