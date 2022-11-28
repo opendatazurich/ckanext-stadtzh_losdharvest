@@ -258,7 +258,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             if not resource_dict.get("name"):
                 resource_dict["name"] = dataset_dict["name"]
 
-            if "csv" in resource_dict.get("mimetype"):
+            if "csv" in resource_dict.get("mimetype", ""):
                 resource_dict["url_type"] = "file"
                 resource_dict["resource_type"] = "file"
             else:
