@@ -66,6 +66,8 @@ jobs:
         pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-theme/dockerizing/pip-requirements.txt && \
         pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-harvest.git@dockerizing#egg=ckanext-stadtzh-harvest && \
         pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-harvest/dockerizing/requirements.txt
+        pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
+        pip install -e git+https://github.com/ckan/ckanext-xloader.git#egg=ckanext-xloader
     - name: Install py2 ckanext-dcat requirements
       if: ${{ matrix.ckan-version == '2.9-py2' }}
       run: |
