@@ -186,40 +186,14 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_attributes(self, dataset_ref):
         """Get the attributes for the dataset out of the dimensions"""
         attributes = []
-        refs = self._object_value_list(
-            dataset_ref, CUBE.dimension
-        )
-        for ref in refs:
-            # Setting the predicate like this because `CUBE.as` produced
-            # a Python error :(
-            code_url = self._object_value_list(
-                ref, rdflib.term.URIRef(u'https://cube.link/view/as'))
+        for ref in self._objects_from_losd_predicate(
+                dataset_ref, 'dataAttribute'
+        ):
+            speak_name = self._object(ref, SCHEMA.name)
+            tech_name = self._object(ref, SCHEMA.alternateName)
+            description = self._object(ref, SCHEMA.description)
 
-            try:
-                content, content_type = get_content_and_type(code_url[0])
-            except RuntimeError as e:
-                log.info(e)
-                continue
-
-            parser = LosdCodeParser()
-            parser.parse(content, content_type)
-
-            name = ''
-            for name in parser.name():
-                speak_name = name
-                break
-
-            tech_name = ''
-            for identifier in parser.identifier():
-                tech_name = identifier
-                break
-
-            description = ''
-            for desc in parser.description():
-                description = desc
-                break
-
-            if tech_name != '':
+            if tech_name is not None:
                 attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
             else:
                 attribute_name = speak_name
@@ -290,10 +264,21 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 # config locally
                 # resource_dict["format"] = "CSV"
                 resource_dict["resource_type"] = "api"
+            log.warning(resource_dict)
 
             resource_list.append(resource_dict)
 
         return resource_list
+
+    def _objects_from_losd_predicate(self, ref, predicate_name):
+        """Get the objects with this subject and predicate name, where
+        the predicate is defined in either the SSZ LD namespace, or the INTEG
+        SSZ LD namespace.
+        """
+        for o in self.g.objects(ref, BASE[predicate_name]):
+            yield o
+        for o in self.g.objects(ref, BASEINT[predicate_name]):
+            yield o
 
     def _object_value_from_losd_predicate(self, ref, predicate_name):
         """Get the object value with this subject and predicate name, where
