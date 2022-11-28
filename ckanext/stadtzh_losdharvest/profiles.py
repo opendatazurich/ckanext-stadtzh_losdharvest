@@ -141,7 +141,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_dict['timeRange'] = ' '.join(time_range_parts)
 
         # Attributes
-        dataset_dict['sszFields'] = self._json_encode_attributes(
+        dataset_dict['sszFields'] = json.dumps(
             self._get_attributes(dataset_ref))
 
         # Resources
@@ -172,16 +172,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
             name = munge_title_to_name(title)
             groups.append((name, title))
         return stadtzhharvest_get_group_names(groups)
-
-    def _json_encode_attributes(self, properties):
-        # todo: Uncomment these lines once the LOSD source includes
-        # descriptions for attributes.
-        # attributes = []
-        # for key, value in properties:
-        #     if value:
-        #         attributes.append((key, value))
-
-        return json.dumps(properties)
 
     def _get_attributes(self, dataset_ref):
         """Get the attributes for the dataset out of the dimensions"""
