@@ -61,15 +61,15 @@ def get_content_and_type(url, content_type=None):
 
         return content, content_type
 
-    except requests.exceptions.HTTPError, error:
+    except requests.exceptions.HTTPError as error:
         msg = 'Could not get content from %s. Server responded with %s %s' \
               % (url, error.response.status_code, error.response.reason)
         raise RuntimeError(msg)
-    except requests.exceptions.ConnectionError, error:
+    except requests.exceptions.ConnectionError as error:
         msg = '''Could not get content from %s because a
                                 connection error occurred. %s''' % (url, error)
         raise RuntimeError(msg)
-    except requests.exceptions.Timeout, error:
+    except requests.exceptions.Timeout:
         msg = 'Could not get content from %s because the connection timed' \
               ' out.' % url
         raise RuntimeError(msg)
