@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 MAX_FILE_SIZE = 1024 * 1024 * 50  # 50 Mb
 CHUNK_SIZE = 1024
 RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
+TIMEOUT_SECONDS = 15
 
 
 def get_content_and_type(url, content_type=None):
@@ -33,7 +34,7 @@ def get_content_and_type(url, content_type=None):
         did_get = False
         r = session.head(url)
         if r.status_code == 405 or r.status_code == 400:
-            r = session.get(url, stream=True)
+            r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
             did_get = True
         r.raise_for_status()
 
@@ -45,7 +46,7 @@ def get_content_and_type(url, content_type=None):
             raise RuntimeError(msg)
 
         if not did_get:
-            r = session.get(url, stream=True)
+            r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
 
         length = 0
         content = ''
