@@ -197,7 +197,8 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_rights_for_dataset_ref(self, dataset_ref):
         """Get rights statement for a dataset ref
         """
-        dataset_rights_ref = self._object(dataset_ref, BASE.legalFoundation)
+        dataset_rights_ref = self._object_from_losd_predicate(
+            dataset_ref, "legalFoundation")
         if not dataset_rights_ref:
             return ""
 
@@ -205,7 +206,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             content, content_type = get_content_and_type(dataset_rights_ref)
             parser = LosdParser()
             parser.parse(content, content_type)
-            # TODO: get necessary data and return it
+            return parser.name()
         except RuntimeError as e:
             log.warning(e)
 
@@ -259,6 +260,16 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """
         value = self._object_value(ref, BASE[predicate_name]) or \
             self._object_value(ref, BASEINT[predicate_name])
+
+        return value
+
+    def _object_from_losd_predicate(self, ref, predicate_name):
+        """Get the first object with this subject and predicate name, where
+        the predicate is defined in either the SSZ LD namespace, or the INTEG
+        SSZ LD namespace.
+        """
+        value = self._object(ref, BASE[predicate_name]) or \
+            self._object(ref, BASEINT[predicate_name])
 
         return value
 
