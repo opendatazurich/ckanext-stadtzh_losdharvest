@@ -14,8 +14,11 @@ class LosdParser(RDFParser):
     """Basic parser for LOSD pages.
     """
     def name(self):
+        """Returns the first object in the graph with the predicate
+        SCHEMA.name.
+        """
         for obj in self.g.objects(predicate=SCHEMA.name):
-            yield obj
+            return obj
 
 
 class LosdViewsParser(LosdParser):
