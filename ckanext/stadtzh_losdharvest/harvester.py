@@ -4,10 +4,11 @@ import json
 import uuid
 import logging
 import datetime
+import traceback
+import requests
 
 import ckan.plugins as p
 import ckan.model as model
-import requests
 
 import ckan.lib.plugins as lib_plugins
 
