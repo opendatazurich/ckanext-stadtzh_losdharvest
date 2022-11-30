@@ -13,7 +13,9 @@ from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzh_losdharvest.processors import LosdParser
 from ckanext.stadtzh_losdharvest.utils import get_content_and_type
 from ckanext.stadtzhharvest.utils import (
-    stadtzhharvest_find_or_create_organization, stadtzhharvest_get_group_names)
+    stadtzhharvest_find_or_create_organization,
+    stadtzhharvest_get_group_names,
+)
 
 log = logging.getLogger(__name__)
 

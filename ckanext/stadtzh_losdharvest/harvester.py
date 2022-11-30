@@ -1,22 +1,21 @@
 # coding: utf-8
 
-import json
-import uuid
-import logging
 import datetime
+import json
+import logging
 import traceback
-import requests
-
-import ckan.plugins as p
-import ckan.model as model
+import uuid
 
 import ckan.lib.plugins as lib_plugins
+import ckan.model as model
+import ckan.plugins as p
+import requests
 
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 from ckanext.dcat.processors import RDFParserException
-from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 from ckanext.harvest.logic.schema import unicode_safe
+from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 from ckanext.stadtzh_losdharvest.processors import LosdViewsParser
 
 log = logging.getLogger(__name__)
