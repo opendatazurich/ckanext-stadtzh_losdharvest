@@ -3,6 +3,7 @@
 import json
 import uuid
 import logging
+import datetime
 
 import ckan.plugins as p
 import ckan.model as model
@@ -49,6 +50,10 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         session.headers.update({"Accept": "text/turtle"})
         return session
 
+    def _is_published(self, date_str):
+        datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+        return datetime_obj < datetime.datetime.now()
+
     def import_stage(self, harvest_object):
 
         log.debug('In StadtzhHarvester import_stage')
@@ -64,6 +69,12 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             self._save_object_error('Could not parse content for object {0}'.format(harvest_object.id),
                                     harvest_object, 'Import')
             return False
+
+        # set harvest_object's status to 'delete' if the
+        # package's issue-date is in the future
+        if not self._is_published(dataset.get("dateFirstPublished", None)):
+            harvest_object.extras = [HarvestObjectExtra(key='status',
+                                                        value='delete')]
 
         status = self._get_object_extra(harvest_object, 'status')
         if status == 'delete':
