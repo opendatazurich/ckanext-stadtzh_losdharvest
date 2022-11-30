@@ -11,8 +11,8 @@ SCHEMA = Namespace("http://schema.org/")
 
 
 class LosdParser(RDFParser):
-    """Basic parser for LOSD pages.
-    """
+    """Basic parser for LOSD pages."""
+
     def name(self):
         """Returns the first object in the graph with the predicate
         SCHEMA.name.
@@ -22,14 +22,14 @@ class LosdParser(RDFParser):
 
 
 class LosdViewsParser(LosdParser):
-    """Parses the page that lists views to import.
-    """
+    """Parses the page that lists views to import."""
+
     def views(self):
-        '''
+        """
         Generator that returns all DCAT datasets on the graph
 
         Yields rdflib.term.URIRef objects that can be used on graph lookups
         and queries
-        '''
+        """
         for obj in self.g.objects(predicate=SCHEMA.dataset):
             yield obj
