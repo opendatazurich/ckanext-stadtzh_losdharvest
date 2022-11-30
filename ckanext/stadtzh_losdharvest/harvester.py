@@ -53,17 +53,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         log.debug('In StadtzhHarvester import_stage')
 
-        status = self._get_object_extra(harvest_object, 'status')
-        if status == 'delete':
-            # Delete package
-            context = {'model': model, 'session': model.Session,
-                       'user': self._get_user_name(), 'ignore_auth': True}
-
-            p.toolkit.get_action('package_delete')(context, {'id': harvest_object.package_id})
-            log.info('Deleted package {0} with guid {1}'.format(harvest_object.package_id,
-                                                                harvest_object.guid))
-            return True
-
         if harvest_object.content is None:
             self._save_object_error('Empty content for object {0}'.format(harvest_object.id),
                                     harvest_object, 'Import')
@@ -75,6 +64,17 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             self._save_object_error('Could not parse content for object {0}'.format(harvest_object.id),
                                     harvest_object, 'Import')
             return False
+
+        status = self._get_object_extra(harvest_object, 'status')
+        if status == 'delete':
+            # Delete package
+            context = {'model': model, 'session': model.Session,
+                       'user': self._get_user_name(), 'ignore_auth': True}
+
+            p.toolkit.get_action('package_delete')(context, {'id': harvest_object.package_id})
+            log.info('Deleted package {0} with guid {1}'.format(harvest_object.package_id,
+                                                                harvest_object.guid))
+            return True
 
         # Get the last harvested object (if any)
         previous_object = model.Session.query(HarvestObject) \
