@@ -154,7 +154,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """
         Get publisher for a dataset.
         """
-        publishers = []
         publisher_ref = self._object_value(dataset_ref, DCTERMS.publisher)
         content, content_type = get_content_and_type(publisher_ref)
         parser = LosdParser()
