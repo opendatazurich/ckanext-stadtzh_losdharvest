@@ -9,7 +9,7 @@ import requests
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 from ckanext.dcat.processors import RDFParserException
-from processors import LosdViewsParser
+from ckanext.stadtzh_losdharvest.processors import LosdViewsParser
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             if content_type is None and r.headers.get('content-type'):
                 content_type = r.headers.get('content-type').split(";", 1)[0]
 
-        except requests.exceptions.RequestException, error:
+        except requests.exceptions.RequestException as error:
             msg = '''Could not get content from %s because an
                                 error occurred. %s''' % (views_url, error)
             self._save_gather_error(msg, harvest_job)
@@ -83,7 +83,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         try:
             parser.parse(content, _format=content_type)
-        except RDFParserException, e:
+        except RDFParserException as e:
             self._save_gather_error('Error parsing the views graph: {0}'
                                     .format(e), harvest_job)
             return None, None
