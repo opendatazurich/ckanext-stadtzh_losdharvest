@@ -71,9 +71,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             context = {'model': model, 'session': model.Session,
                        'user': self._get_user_name(), 'ignore_auth': True}
 
-            p.toolkit.get_action('package_delete')(context, {'id': harvest_object.package_id})
-            log.info('Deleted package {0} with guid {1}'.format(harvest_object.package_id,
-                                                                harvest_object.guid))
+            p.toolkit.get_action('package_delete')(context, {'id': harvest_object.guid})
+            log.info('Deleted package with guid {0}'.format(harvest_object.guid))
             return True
 
         # Get the last harvested object (if any)
