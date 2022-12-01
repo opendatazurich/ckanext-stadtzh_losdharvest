@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 MAX_FILE_SIZE = 1024 * 1024 * 50  # 50 Mb
 CHUNK_SIZE = 1024
-RDF_PROFILES_CONFIG_OPTION = 'ckanext.dcat.rdf.profiles'
+RDF_PROFILES_CONFIG_OPTION = "ckanext.dcat.rdf.profiles"
 TIMEOUT_SECONDS = 15
 
 
@@ -21,11 +21,11 @@ def get_content_and_type(url, content_type=None):
     :return: a tuple containing the content and content-type
     """
 
-    if not url.lower().startswith('http'):
-        raise ValueError('Url should start with http: {}'.format(url))
+    if not url.lower().startswith("http"):
+        raise ValueError("Url should start with http: {}".format(url))
 
     try:
-        log.debug('Getting file %s', url)
+        log.debug("Getting file %s", url)
 
         session = requests.Session()
         session.headers.update({"Accept": "text/turtle"})
@@ -38,39 +38,48 @@ def get_content_and_type(url, content_type=None):
             did_get = True
         r.raise_for_status()
 
-        cl = r.headers.get('content-length')
+        cl = r.headers.get("content-length")
         if cl and int(cl) > MAX_FILE_SIZE:
-            msg = '''Remote file is too big. Allowed
-                    file size: {allowed}, Content-Length: {actual}.'''.format(
-                allowed=MAX_FILE_SIZE, actual=cl)
+            msg = """Remote file is too big. Allowed
+                    file size: {allowed}, Content-Length: {actual}.""".format(
+                allowed=MAX_FILE_SIZE, actual=cl
+            )
             raise RuntimeError(msg)
 
         if not did_get:
             r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
 
         length = 0
-        content = ''
+        content = ""
         for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
             content = content + chunk
             length += len(chunk)
 
             if length >= MAX_FILE_SIZE:
-                raise RuntimeError('Remote file is too big.')
+                raise RuntimeError("Remote file is too big.")
 
-        if content_type is None and r.headers.get('content-type'):
-            content_type = r.headers.get('content-type').split(";", 1)[0]
+        if content_type is None and r.headers.get("content-type"):
+            content_type = r.headers.get("content-type").split(";", 1)[0]
 
         return content, content_type
 
     except requests.exceptions.HTTPError as error:
-        msg = 'Could not get content from %s. Server responded with %s %s' \
-              % (url, error.response.status_code, error.response.reason)
+        msg = "Could not get content from %s. Server responded with %s %s" % (
+            url,
+            error.response.status_code,
+            error.response.reason,
+        )
         raise RuntimeError(msg)
     except requests.exceptions.ConnectionError as error:
-        msg = '''Could not get content from %s because a
-                                connection error occurred. %s''' % (url, error)
+        msg = """Could not get content from %s because a
+                                connection error occurred. %s""" % (
+            url,
+            error,
+        )
         raise RuntimeError(msg)
     except requests.exceptions.Timeout:
-        msg = 'Could not get content from %s because the connection timed' \
-              ' out.' % url
+        msg = (
+            "Could not get content from %s because the connection timed"
+            " out." % url
+        )
         raise RuntimeError(msg)

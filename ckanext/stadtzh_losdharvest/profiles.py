@@ -13,7 +13,9 @@ from ckanext.dcat.profiles import RDFProfile
 from ckanext.stadtzh_losdharvest.processors import LosdParser
 from ckanext.stadtzh_losdharvest.utils import get_content_and_type
 from ckanext.stadtzhharvest.utils import (
-    stadtzhharvest_find_or_create_organization, stadtzhharvest_get_group_names)
+    stadtzhharvest_find_or_create_organization,
+    stadtzhharvest_get_group_names,
+)
 
 log = logging.getLogger(__name__)
 
@@ -59,9 +61,7 @@ namespaces = {
 }
 
 LICENSE_MAPPING_FOR_LOSD = {
-    rdflib.term.URIRef(
-        u"http://creativecommons.org/licenses/by/3.0/"
-    ): "cc-by"
+    rdflib.term.URIRef(u"http://creativecommons.org/licenses/by/3.0/"): "cc-by"
 }
 
 
@@ -93,16 +93,17 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 dataset_dict[key] = value
 
         dataset_dict["name"] = self._object_value(
-            dataset_ref, SCHEMA.alternateName).lower()
-        dataset_dict["notes"] = md(self._object_value(
-            dataset_ref, SCHEMA.description))
+            dataset_ref, SCHEMA.alternateName
+        ).lower()
+        dataset_dict["notes"] = md(
+            self._object_value(dataset_ref, SCHEMA.description)
+        )
         dataset_dict["sszBemerkungen"] = md(
-            self._object_value_from_losd_predicate(
-                dataset_ref, "usageNotes"
-            )
+            self._object_value_from_losd_predicate(dataset_ref, "usageNotes")
         )
         dataset_dict["tags"] = [
-            {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)]
+            {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)
+        ]
         dataset_dict["groups"] = self._get_groups_for_dataset_ref(dataset_ref)
 
         dataset_dict["maintainer"] = "Open Data Zürich"
@@ -130,18 +131,20 @@ class StadtzhLosdDcatProfile(RDFProfile):
         start_date = self._object_value(dataset_ref, SCHEMA.startDate)
         if start_date:
             time_range_parts.append(
-                self._format_datetime_as_string(start_date))
-        time_range_parts.append('-')
+                self._format_datetime_as_string(start_date)
+            )
+        time_range_parts.append("-")
         end_date = self._object_value(dataset_ref, SCHEMA.endDate)
         if end_date:
             time_range_parts.append(self._format_datetime_as_string(end_date))
 
         if start_date or end_date:
-            dataset_dict['timeRange'] = ' '.join(time_range_parts)
+            dataset_dict["timeRange"] = " ".join(time_range_parts)
 
         # Attributes
-        dataset_dict['sszFields'] = json.dumps(
-            self._get_attributes(dataset_ref))
+        dataset_dict["sszFields"] = json.dumps(
+            self._get_attributes(dataset_ref)
+        )
 
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
@@ -173,31 +176,26 @@ class StadtzhLosdDcatProfile(RDFProfile):
         """Get the attributes for the dataset out of the dimensions"""
         attributes = []
         for ref in self._objects_from_losd_predicate(
-                dataset_ref, 'dataAttribute'
+            dataset_ref, "dataAttribute"
         ):
             speak_name = self._object(ref, SCHEMA.name)
             tech_name = self._object(ref, SCHEMA.alternateName)
             description = self._object(ref, SCHEMA.description)
 
             if tech_name is not None:
-                attribute_name = '%s (technisch: %s)' % (speak_name, tech_name)
+                attribute_name = "%s (technisch: %s)" % (speak_name, tech_name)
             else:
                 attribute_name = speak_name
 
-            attributes.append(
-                (
-                    attribute_name,
-                    description
-                )
-            )
+            attributes.append((attribute_name, description))
 
         return list(set(attributes))
 
     def _get_rights_for_dataset_ref(self, dataset_ref):
-        """Get rights statement for a dataset ref
-        """
+        """Get rights statement for a dataset ref"""
         dataset_rights_ref = self._object_from_losd_predicate(
-            dataset_ref, "legalFoundation")
+            dataset_ref, "legalFoundation"
+        )
         if not dataset_rights_ref:
             return ""
 
@@ -212,18 +210,19 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return ""
 
     def _build_resources_dict(self, dataset_ref, dataset_dict):
-        """Get resources for the dataset.
-        """
+        """Get resources for the dataset."""
         resource_list = []
         for resource_ref in self.g.objects(dataset_ref, DCAT.distribution):
             resource_dict = {}
             # For some reason, DCTERMS.format does not work so we have to
             # use the explicit URIRef here.
             for key, predicate in (
-                    ("url", DCAT.downloadURL),
-                    ("format", rdflib.term.URIRef(
-                        u'http://purl.org/dc/terms/format')),
-                    ("mimetype", DCAT.mediaType),
+                ("url", DCAT.downloadURL),
+                (
+                    "format",
+                    rdflib.term.URIRef(u"http://purl.org/dc/terms/format"),
+                ),
+                ("mimetype", DCAT.mediaType),
             ):
                 value = self._object_value(resource_ref, predicate)
                 if value:
@@ -257,8 +256,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         the predicate is defined in either the SSZ LD namespace, or the INTEG
         SSZ LD namespace.
         """
-        value = self._object_value(ref, BASE[predicate_name]) or \
-            self._object_value(ref, BASEINT[predicate_name])
+        value = self._object_value(
+            ref, BASE[predicate_name]
+        ) or self._object_value(ref, BASEINT[predicate_name])
 
         return value
 
@@ -267,14 +267,15 @@ class StadtzhLosdDcatProfile(RDFProfile):
         the predicate is defined in either the SSZ LD namespace, or the INTEG
         SSZ LD namespace.
         """
-        value = self._object(ref, BASE[predicate_name]) or \
-            self._object(ref, BASEINT[predicate_name])
+        value = self._object(ref, BASE[predicate_name]) or self._object(
+            ref, BASEINT[predicate_name]
+        )
 
         return value
 
     def _format_datetime_as_string(self, value):
         try:
             datetime_value = isodate.parse_date(value)
-            return datetime_value.strftime('%d.%m.%Y')
+            return datetime_value.strftime("%d.%m.%Y")
         except (ValueError, KeyError, TypeError, IndexError):
             return value

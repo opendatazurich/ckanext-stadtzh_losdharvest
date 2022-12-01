@@ -15,7 +15,7 @@ jobs:
       - name: Run flake8
         run: flake8 . --count --statistics --exclude ckan
       - name: Run isort
-        run: isort -c -rc -v ckanext
+        run: isort -c -rc -vb ckanext
 
   test:
     needs: lint
