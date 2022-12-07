@@ -109,9 +109,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["maintainer"] = "Open Data Zürich"
         dataset_dict["maintainer_email"] = "opendata@zuerich.ch"
 
-        publishers = self._get_publisher_for_dataset_ref(dataset_ref)
-        if publishers:
-            dataset_dict["url"] = publishers[0]
+        publisher = self._get_publisher_for_dataset_ref(dataset_ref)
+        if publisher:
+            dataset_dict["url"] = dataset_dict["author"] = publisher
 
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
