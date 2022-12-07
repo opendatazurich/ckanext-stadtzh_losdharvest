@@ -111,7 +111,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         publisher = self._get_publisher_for_dataset_ref(dataset_ref)
         if publisher:
-            dataset_dict["url"] = publisher
+            dataset_dict["url"] = dataset_dict["author"] = publisher
 
         dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
             dataset_ref
