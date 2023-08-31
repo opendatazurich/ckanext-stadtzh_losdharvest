@@ -61,7 +61,7 @@ namespaces = {
 }
 
 LICENSE_MAPPING_FOR_LOSD = {
-    rdflib.term.URIRef(u"http://creativecommons.org/licenses/by/3.0/"): "cc-by"
+    rdflib.term.URIRef("http://creativecommons.org/licenses/by/3.0/"): "cc-by"
 }
 
 
@@ -95,9 +95,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["name"] = self._object_value(
             dataset_ref, SCHEMA.alternateName
         ).lower()
-        dataset_dict["notes"] = md(
-            self._object_value(dataset_ref, SCHEMA.description)
-        )
+        dataset_dict["notes"] = md(self._object_value(dataset_ref, SCHEMA.description))
         dataset_dict["sszBemerkungen"] = md(
             self._object_value_from_losd_predicate(dataset_ref, "usageNotes")
         )
@@ -113,9 +111,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         if publisher:
             dataset_dict["url"] = dataset_dict["author"] = publisher
 
-        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(
-            dataset_ref
-        )
+        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(dataset_ref)
 
         # Date fields
         for key, predicate in (
@@ -130,9 +126,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         time_range_parts = []
         start_date = self._object_value(dataset_ref, SCHEMA.startDate)
         if start_date:
-            time_range_parts.append(
-                self._format_datetime_as_string(start_date)
-            )
+            time_range_parts.append(self._format_datetime_as_string(start_date))
         time_range_parts.append("-")
         end_date = self._object_value(dataset_ref, SCHEMA.endDate)
         if end_date:
@@ -142,9 +136,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             dataset_dict["timeRange"] = " ".join(time_range_parts)
 
         # Attributes
-        dataset_dict["sszFields"] = json.dumps(
-            self._get_attributes(dataset_ref)
-        )
+        dataset_dict["sszFields"] = json.dumps(self._get_attributes(dataset_ref))
 
         # Resources
         dataset_dict["resources"] = self._build_resources_dict(
@@ -175,9 +167,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
     def _get_attributes(self, dataset_ref):
         """Get the attributes for the dataset out of the dimensions"""
         attributes = []
-        for ref in self._objects_from_losd_predicate(
-            dataset_ref, "dataAttribute"
-        ):
+        for ref in self._objects_from_losd_predicate(dataset_ref, "dataAttribute"):
             speak_name = self._object(ref, SCHEMA.name)
             tech_name = self._object(ref, SCHEMA.alternateName)
             description = self._object(ref, SCHEMA.description)
@@ -220,7 +210,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 ("url", DCAT.downloadURL),
                 (
                     "format",
-                    rdflib.term.URIRef(u"http://purl.org/dc/terms/format"),
+                    rdflib.term.URIRef("http://purl.org/dc/terms/format"),
                 ),
                 ("mimetype", DCAT.mediaType),
             ):
@@ -256,9 +246,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         the predicate is defined in either the SSZ LD namespace, or the INTEG
         SSZ LD namespace.
         """
-        value = self._object_value(
-            ref, BASE[predicate_name]
-        ) or self._object_value(ref, BASEINT[predicate_name])
+        value = self._object_value(ref, BASE[predicate_name]) or self._object_value(
+            ref, BASEINT[predicate_name]
+        )
 
         return value
 
