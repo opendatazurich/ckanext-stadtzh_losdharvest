@@ -14,7 +14,7 @@ CKAN instance (https://data.stadt-zuerich.ch/).
 Requirements
 ------------
 
-This harvester was developed against CKAN 2.7.
+This harvester was developed against CKAN 2.10.
 
 
 ------------
