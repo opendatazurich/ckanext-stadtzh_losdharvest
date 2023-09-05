@@ -14,7 +14,7 @@ CKAN instance (https://data.stadt-zuerich.ch/).
 Requirements
 ------------
 
-This harvester was developed against CKAN 2.7.
+This harvester was developed against CKAN 2.10.
 
 
 ------------
@@ -85,10 +85,9 @@ Running the Tests
 
 To run the tests, do::
 
-    nosetests --nologcapture --with-pylons=test.ini
+    pytest --ckan-ini=test.ini --disable-warnings ckanext/stadtzhtheme/tests
 
 To run the tests and produce a coverage report, first make sure you have
 coverage installed in your virtualenv (``pip install coverage``) then run::
 
-    nosetests --nologcapture --with-pylons=test.ini --with-coverage --cover-package=ckanext.stadtzh_losdharvest --cover-inclusive --cover-erase --cover-tests
-
+    pytest --ckan-ini=test.ini --cov=ckanext.stadtzh_losdharvest --disable-warnings ckanext/stadtzh_losdharvest/tests

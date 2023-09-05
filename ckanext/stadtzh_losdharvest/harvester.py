@@ -34,7 +34,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         return {
             "name": "stadtzh_losdharvest",
             "title": "LOSD Harvester for the City of Zurich",
-            "description": "Harvester for the LOSD Portal of the City of Zurich",  # noqa
+            "description": "Harvester for the LOSD Portal of the City of Zurich",
         }
 
     def validate_config(self, source_config):
@@ -55,7 +55,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         return datetime_obj < datetime.datetime.now()
 
     def import_stage(self, harvest_object):
-
         log.debug("In StadtzhHarvester import_stage")
 
         dataset = None
@@ -77,9 +76,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                 dataset = json.loads(harvest_object.content)
             except ValueError:
                 self._save_object_error(
-                    "Could not parse content for object {0}".format(
-                        harvest_object.id
-                    ),
+                    "Could not parse content for object {0}".format(harvest_object.id),
                     harvest_object,
                     "Import",
                 )
@@ -101,12 +98,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                 "ignore_auth": True,
             }
 
-            p.toolkit.get_action("package_delete")(
-                context, {"id": harvest_object.guid}
-            )
-            log.info(
-                "Deleted package with guid {0}".format(harvest_object.guid)
-            )
+            p.toolkit.get_action("package_delete")(context, {"id": harvest_object.guid})
+            log.info("Deleted package with guid {0}".format(harvest_object.guid))
             return True
 
         # Get the last harvested object (if any)
@@ -144,10 +137,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             if existing_dataset:
                 package_schema = package_plugin.update_package_schema()
                 for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                    package_schema = (
-                        harvester.update_package_schema_for_update(
-                            package_schema
-                        )
+                    package_schema = harvester.update_package_schema_for_update(
+                        package_schema
                     )
                 context["schema"] = package_schema
 
@@ -170,9 +161,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                         resource["id"] = resource_mapping[res_uri]
 
                 for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                    harvester.before_update(
-                        harvest_object, dataset, harvester_tmp_dict
-                    )
+                    harvester.before_update(harvest_object, dataset, harvester_tmp_dict)
 
                 try:
                     if dataset:
@@ -180,13 +169,9 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                         harvest_object.package_id = dataset["id"]
                         harvest_object.add()
 
-                        p.toolkit.get_action("package_update")(
-                            context, dataset
-                        )
+                        p.toolkit.get_action("package_update")(context, dataset)
                     else:
-                        log.info(
-                            "Ignoring dataset %s" % existing_dataset["name"]
-                        )
+                        log.info("Ignoring dataset %s" % existing_dataset["name"])
                         return "unchanged"
                 except p.toolkit.ValidationError as e:
                     self._save_object_error(
@@ -214,10 +199,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             else:
                 package_schema = package_plugin.create_package_schema()
                 for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                    package_schema = (
-                        harvester.update_package_schema_for_create(
-                            package_schema
-                        )
+                    package_schema = harvester.update_package_schema_for_create(
+                        package_schema
                     )
                 context["schema"] = package_schema
 
@@ -229,9 +212,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
                 name = dataset["name"]
                 for harvester in p.PluginImplementations(IDCATRDFHarvester):
-                    harvester.before_create(
-                        harvest_object, dataset, harvester_tmp_dict
-                    )
+                    harvester.before_create(harvest_object, dataset, harvester_tmp_dict)
 
                 try:
                     if dataset:
@@ -243,14 +224,11 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                         # indexed with the harvest object id (on the after_show
                         # hook from the harvester plugin)
                         model.Session.execute(
-                            "SET CONSTRAINTS harvest_object_package_id_fkey"
-                            " DEFERRED"
+                            "SET CONSTRAINTS harvest_object_package_id_fkey" " DEFERRED"
                         )
                         model.Session.flush()
 
-                        p.toolkit.get_action("package_create")(
-                            context, dataset
-                        )
+                        p.toolkit.get_action("package_create")(context, dataset)
                     else:
                         log.info("Ignoring dataset %s" % name)
                         return "unchanged"
@@ -291,9 +269,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         return True
 
-    def _get_content_and_type(
-        self, views_url, harvest_job, page=1, content_type=None
-    ):
+    def _get_content_and_type(self, views_url, harvest_job, page=1, content_type=None):
         """
         Overwritten from parent method because our source url goes to a
         list of links to views. We need to get all those links out first,
@@ -307,9 +283,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         try:
             if page > 1:
-                views_url = (
-                    views_url + "&" if "?" in views_url else views_url + "?"
-                )  # noqa
+                views_url = views_url + "&" if "?" in views_url else views_url + "?"
                 views_url = views_url + "page={0}".format(page)
 
             log.debug("Getting file %s", views_url)
@@ -349,9 +323,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         for view_url in parser.views():
             # Pass this UriRef to the parent _get_content_and_type method,
             # get the content and concatenate it to existing content
-            view, view_type = super(
-                DCATRDFHarvester, self
-            )._get_content_and_type(  # noqa
+            view, view_type = super(DCATRDFHarvester, self)._get_content_and_type(
                 view_url, harvest_job
             )
             # log.warning(view)

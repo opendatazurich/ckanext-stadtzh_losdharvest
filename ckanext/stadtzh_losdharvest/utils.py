@@ -78,8 +78,5 @@ def get_content_and_type(url, content_type=None):
         )
         raise RuntimeError(msg)
     except requests.exceptions.Timeout:
-        msg = (
-            "Could not get content from %s because the connection timed"
-            " out." % url
-        )
+        msg = "Could not get content from %s because the connection timed" " out." % url
         raise RuntimeError(msg)
