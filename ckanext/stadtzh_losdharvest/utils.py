@@ -50,7 +50,7 @@ def get_content_and_type(url, content_type=None):
             r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
 
         length = 0
-        content = ""
+        content = b""
         for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
             content = content + chunk
             length += len(chunk)

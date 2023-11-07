@@ -292,7 +292,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             self.update_session(session)
             r = session.get(views_url, stream=True)
 
-            content = ""
+            content = b""
             for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
                 content = content + chunk
 
