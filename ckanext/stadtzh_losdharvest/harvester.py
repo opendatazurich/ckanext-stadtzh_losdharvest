@@ -51,8 +51,17 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         return session
 
     def _is_published(self, date_str):
-        datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
-        return datetime_obj < datetime.datetime.now()
+        """Return True if the date_str is not None and refers to a date in the past."""
+        if date_str is None:
+            return False
+        try:
+            datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+            return datetime_obj < datetime.datetime.now()
+        except (ValueError, TypeError):
+            self._save_object_error(
+                "Value of DCT.issued should be an ISO 8601 date string. "
+                "Instead we got: {}".format(date_str)
+            )
 
     def import_stage(self, harvest_object):
         log.debug("In StadtzhHarvester import_stage")
