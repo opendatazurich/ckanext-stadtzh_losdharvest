@@ -58,6 +58,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
             return datetime_obj < datetime.datetime.now()
         except (ValueError, TypeError):
+            # If the date_str doesn't have the expected format %d.%m.%Y, it means we
+            # got a weird value from the source and couldn't convert it.
             self._save_object_error(
                 "Value of DCT.issued should be an ISO 8601 date string. "
                 "Instead we got: {}".format(date_str)
