@@ -51,8 +51,19 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         return session
 
     def _is_published(self, date_str):
-        datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
-        return datetime_obj < datetime.datetime.now()
+        """Return True if the date_str is not None and refers to a date in the past."""
+        if date_str is None:
+            return False
+        try:
+            datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+            return datetime_obj < datetime.datetime.now()
+        except (ValueError, TypeError):
+            # If the date_str doesn't have the expected format %d.%m.%Y, it means we
+            # got a weird value from the source and couldn't convert it.
+            self._save_object_error(
+                "Value of DCT.issued should be an ISO 8601 date string. "
+                "Instead we got: {}".format(date_str)
+            )
 
     def import_stage(self, harvest_object):
         log.debug("In StadtzhHarvester import_stage")
@@ -85,9 +96,14 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             # set harvest_object's status to 'delete' if the
             # package's issue-date is in the future
             if not self._is_published(dataset.get("dateFirstPublished", None)):
+                log.info(
+                    "Deleting dataset {} because it has not yet been published, "
+                    "according to the DCT.issued value at the source"
+                )
                 harvest_object.extras = [
                     HarvestObjectExtra(key="status", value="delete")
                 ]
+                status = "delete"
 
         if status == "delete":
             # Delete package
