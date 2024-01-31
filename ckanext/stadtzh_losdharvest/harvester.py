@@ -94,9 +94,14 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             # set harvest_object's status to 'delete' if the
             # package's issue-date is in the future
             if not self._is_published(dataset.get("dateFirstPublished", None)):
+                log.info(
+                    "Deleting dataset {} because it has not yet been published, "
+                    "according to the DCT.issued value at the source"
+                )
                 harvest_object.extras = [
                     HarvestObjectExtra(key="status", value="delete")
                 ]
+                status = "delete"
 
         if status == "delete":
             # Delete package
