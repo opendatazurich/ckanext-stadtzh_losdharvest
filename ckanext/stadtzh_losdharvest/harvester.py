@@ -55,9 +55,9 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         except (ValueError, TypeError):
             # If the date_str doesn't have the expected format %d.%m.%Y, it means we
             # got a weird value from the source and couldn't convert it.
-            self._save_object_error(
-                "Value of DCT.issued should be an ISO 8601 date string. "
-                "Instead we got: {}".format(date_str)
+            log.warning(
+                "Value of DCT.issued in dataset {} should be an ISO 8601 date string. "
+                "Instead we got: {}".format(dataset.get("name"), date_str)
             )
 
     def after_parsing(self, rdf_parser, harvest_job):
