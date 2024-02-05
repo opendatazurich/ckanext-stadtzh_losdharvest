@@ -45,12 +45,22 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         return session
 
     def _is_published(self, dataset):
-        """Return True if the dataset has a dateFirstPublished in the past."""
+        """Return True if the dataset has a dateFirstPublished in the past.
+        This value is mapped from the attribute dcterms:issued.
+        """
         date_str = dataset.get("dateFirstPublished", None)
         if date_str is None:
+            log.info(
+                "Not harvesting dataset {} because it has no value for dcterms:issued"
+            )
             return False
         try:
             datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+            if datetime_obj > datetime.datetime.now():
+                log.info(
+                    "Not harvesting dataset {} because its dcterms:issued date is in "
+                    "the future"
+                )
             return datetime_obj < datetime.datetime.now()
         except (ValueError, TypeError):
             # If the date_str doesn't have the expected format %d.%m.%Y, it means we
@@ -59,6 +69,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                 "Value of DCT.issued in dataset {} should be an ISO 8601 date string. "
                 "Instead we got: {}".format(dataset.get("name"), date_str)
             )
+            return False
 
     def after_parsing(self, rdf_parser, harvest_job):
         """Called just after the content from the remote RDF file has been parsed
