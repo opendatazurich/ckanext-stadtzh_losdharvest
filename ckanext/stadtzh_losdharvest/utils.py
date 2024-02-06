@@ -31,20 +31,7 @@ def get_content_and_type(url, content_type=None):
         session.headers.update({"Accept": "text/turtle"})
 
         # first we try a HEAD request which may not be supported
-        did_get = False
-        r = session.head(url)
-        if r.status_code == 405 or r.status_code == 400:
-            r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
-            did_get = True
-        r.raise_for_status()
-
-        cl = r.headers.get("content-length")
-        if cl and int(cl) > MAX_FILE_SIZE:
-            msg = """Remote file is too big. Allowed
-                    file size: {allowed}, Content-Length: {actual}.""".format(
-                allowed=MAX_FILE_SIZE, actual=cl
-            )
-            raise RuntimeError(msg)
+        r, did_get = make_head_request(url, session)
 
         if not did_get:
             r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
@@ -80,3 +67,22 @@ def get_content_and_type(url, content_type=None):
     except requests.exceptions.Timeout:
         msg = "Could not get content from %s because the connection timed" " out." % url
         raise RuntimeError(msg)
+
+
+def make_head_request(url, session):
+    did_get = False
+    r = session.head(url)
+    if r.status_code == 405 or r.status_code == 400:
+        r = session.get(url, stream=True, timeout=TIMEOUT_SECONDS)
+        did_get = True
+    r.raise_for_status()
+
+    cl = r.headers.get("content-length")
+    if cl and int(cl) > MAX_FILE_SIZE:
+        msg = """Remote file is too big. Allowed
+                        file size: {allowed}, Content-Length: {actual}.""".format(
+            allowed=MAX_FILE_SIZE, actual=cl
+        )
+        raise RuntimeError(msg)
+
+    return r, did_get
