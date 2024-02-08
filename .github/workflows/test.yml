@@ -57,10 +57,10 @@ jobs:
         pip install -U requests[security]
     - name: Install required ckanexts
       run: |
-        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-theme.git@dockerizing#egg=ckanext-stadtzh-theme && \
-        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-theme/dockerizing/pip-requirements.txt && \
-        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-harvest.git@dockerizing#egg=ckanext-stadtzh-harvest && \
-        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-harvest/dockerizing/requirements.txt
+        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-theme.git@main#egg=ckanext-stadtzh-theme && \
+        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-theme/main/pip-requirements.txt && \
+        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-harvest.git@main#egg=ckanext-stadtzh-harvest && \
+        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-harvest/main/requirements.txt
         pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
         pip install -e git+https://github.com/ckan/ckanext-xloader.git#egg=ckanext-xloader && \
         pip install -e git+https://github.com/ckan/ckanext-harvest.git#egg=ckanext-harvest && \
