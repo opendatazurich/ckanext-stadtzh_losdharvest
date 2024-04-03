@@ -26,7 +26,6 @@ VOID = Namespace("http://rdfs.org/ns/void#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
 XSD = Namespace("http://www.w3.org/2001/XMLSchema#")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
-DCELEMENTS = Namespace("http://purl.org/dc/elements/1.1/")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 WV = Namespace("http://vocab.org/waiver/terms/norms")
 SD = Namespace("http://www.w3.org/ns/sparql-service-description#")
@@ -48,7 +47,6 @@ namespaces = {
     "owl": OWL,
     "xsd": XSD,
     "dcterms": DCTERMS,
-    "dcelements": DCELEMENTS,
     "foaf": FOAF,
     "wv": WV,
     "sd": SD,
@@ -88,9 +86,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("spatialRelationship", DCTERMS.spatial),
             ("sparqlEndpoint", VOID.sparqlEndpoint),
             ("updateInterval", DCTERMS.accrualPeriodicity),
-            ("license_id", DCTERMS.license),
-            ("dataType", DCELEMENTS.type),
-            ("version", SCHEMA.version),
+            ("license_id", DCTERMS.license)
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -103,6 +99,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["sszBemerkungen"] = md(
             self._object_value_from_losd_predicate(dataset_ref, "usageNotes")
         )
+
+        dataset_dict["legalInformation"] = self._object_value_from_losd_predicate(dataset_ref, "legalFoundation")
+
         dataset_dict["tags"] = [
             {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)
         ]
@@ -114,8 +113,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
         publisher = self._get_publisher_for_dataset_ref(dataset_ref)
         if publisher:
             dataset_dict["url"] = dataset_dict["author"] = publisher
-
-        dataset_dict["legalInformation"] = self._get_rights_for_dataset_ref(dataset_ref)
 
         # Date fields
         for key, predicate in (
