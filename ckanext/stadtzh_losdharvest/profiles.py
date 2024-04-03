@@ -86,7 +86,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("spatialRelationship", DCTERMS.spatial),
             ("sparqlEndpoint", VOID.sparqlEndpoint),
             ("updateInterval", DCTERMS.accrualPeriodicity),
-            ("license_id", DCTERMS.license)
+            ("license_id", DCTERMS.license),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -100,7 +100,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
             self._object_value_from_losd_predicate(dataset_ref, "usageNotes")
         )
 
-        dataset_dict["legalInformation"] = self._object_value_from_losd_predicate(dataset_ref, "legalFoundation")
+        dataset_dict["legalInformation"] = self._object_value_from_losd_predicate(
+            dataset_ref, "legalFoundation"
+        )
 
         dataset_dict["tags"] = [
             {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)
