@@ -184,24 +184,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return list(set(attributes))
 
-    def _get_rights_for_dataset_ref(self, dataset_ref):
-        """Get rights statement for a dataset ref"""
-        dataset_rights_ref = self._object_from_losd_predicate(
-            dataset_ref, "legalFoundation"
-        )
-        if not dataset_rights_ref:
-            return ""
-
-        try:
-            content, content_type = get_content_and_type(dataset_rights_ref)
-            parser = LosdParser()
-            parser.parse(content, content_type)
-            return parser.name()
-        except RuntimeError as e:
-            log.warning(e)
-
-        return ""
-
     def _build_resources_dict(self, dataset_ref, dataset_dict):
         """Get resources for the dataset."""
         resource_list = []
