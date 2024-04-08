@@ -87,6 +87,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("sparqlEndpoint", VOID.sparqlEndpoint),
             ("updateInterval", DCTERMS.accrualPeriodicity),
             ("license_id", DCTERMS.license),
+            ("author", SCHEMA.author),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
@@ -114,7 +115,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         publisher = self._get_publisher_for_dataset_ref(dataset_ref)
         if publisher:
-            dataset_dict["url"] = dataset_dict["author"] = publisher
+            dataset_dict["url"] = publisher
 
         # Date fields
         for key, predicate in (
