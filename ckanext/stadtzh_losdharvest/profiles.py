@@ -175,15 +175,22 @@ class StadtzhLosdDcatProfile(RDFProfile):
             speak_name = self._object(ref, SCHEMA.name)
             tech_name = self._object(ref, SCHEMA.alternateName)
             description = self._object(ref, SCHEMA.description)
+            position = self._object(ref, SCHEMA.position) or 0
 
             if tech_name is not None:
                 attribute_name = "%s (technisch: %s)" % (speak_name, tech_name)
             else:
                 attribute_name = speak_name
 
-            attributes.append((attribute_name, description))
+            attributes.append({"attribute_name": attribute_name, "description": description, "position": position})
 
-        return list(set(attributes))
+        attributes.sort(key=lambda x: x["position"])
+
+        result_attributes = []
+        for item in attributes:
+            result_attributes.append((item["attribute_name"], item["description"]))
+
+        return result_attributes
 
     def _build_resources_dict(self, dataset_ref, dataset_dict):
         """Get resources for the dataset."""
