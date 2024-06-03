@@ -186,7 +186,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 {
                     "attribute_name": attribute_name,
                     "description": description,
-                    "position": position
+                    "position": position,
                 }
             )
 
