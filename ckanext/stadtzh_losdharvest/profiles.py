@@ -182,7 +182,13 @@ class StadtzhLosdDcatProfile(RDFProfile):
             else:
                 attribute_name = speak_name
 
-            attributes.append({"attribute_name": attribute_name, "description": description, "position": position})
+            attributes.append(
+                {
+                    "attribute_name": attribute_name,
+                    "description": description,
+                    "position": position
+                }
+            )
 
         attributes.sort(key=lambda x: x["position"])
 
