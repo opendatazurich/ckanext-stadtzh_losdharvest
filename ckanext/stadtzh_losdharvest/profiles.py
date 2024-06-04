@@ -108,6 +108,9 @@ class StadtzhLosdDcatProfile(RDFProfile):
         dataset_dict["tags"] = [
             {"name": munge_tag(tag)} for tag in self._keywords(dataset_ref)
         ]
+        # set fixed tag
+        dataset_dict["tags"].append({"name": "lod"})
+
         dataset_dict["groups"] = self._get_groups_for_dataset_ref(dataset_ref)
 
         dataset_dict["maintainer"] = "Open Data Zürich"
