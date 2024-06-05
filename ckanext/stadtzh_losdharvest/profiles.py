@@ -178,7 +178,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             speak_name = self._object(ref, SCHEMA.name)
             tech_name = self._object(ref, SCHEMA.alternateName)
             description = self._object(ref, SCHEMA.description)
-            position = self._object(ref, SCHEMA.position) or 0
+            position = self._object_value_int(ref, SCHEMA.position) or 0
 
             if tech_name is not None:
                 attribute_name = "%s (technisch: %s)" % (speak_name, tech_name)
