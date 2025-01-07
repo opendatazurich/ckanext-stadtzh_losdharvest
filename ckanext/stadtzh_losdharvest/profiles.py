@@ -25,7 +25,7 @@ QUDT = Namespace("http://qudt.org/schema/qudt#")
 VOID = Namespace("http://rdfs.org/ns/void#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
 XSD = Namespace("http://www.w3.org/2001/XMLSchema#")
-DCTERMS = Namespace("http://purl.org/dc/terms/")
+DCTERMS = Namespace("https://purl.org/dc/terms/")
 FOAF = Namespace("http://xmlns.com/foaf/0.1/")
 WV = Namespace("http://vocab.org/waiver/terms/norms")
 SD = Namespace("http://www.w3.org/ns/sparql-service-description#")
@@ -212,7 +212,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
                 ("url", DCAT.downloadURL),
                 (
                     "format",
-                    rdflib.term.URIRef("http://purl.org/dc/terms/format"),
+                    rdflib.term.URIRef("https://purl.org/dc/terms/format"),
                 ),
                 ("mimetype", DCAT.mediaType),
             ):

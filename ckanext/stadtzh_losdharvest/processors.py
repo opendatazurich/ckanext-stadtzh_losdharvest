@@ -7,7 +7,7 @@ from ckanext.dcat.processors import RDFParser
 
 log = logging.getLogger(__name__)
 
-SCHEMA = Namespace("http://schema.org/")
+SCHEMA = Namespace("https://schema.org/")
 
 
 class LosdParser(RDFParser):
