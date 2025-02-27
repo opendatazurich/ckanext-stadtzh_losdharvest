@@ -4,8 +4,10 @@ import datetime
 import json
 import logging
 
+import ckan.model as model
 import ckan.plugins as p
 import requests
+from ckan.logic import get_action
 
 from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
@@ -86,6 +88,27 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         rdf_parser.datasets = filter_datasets
 
         return rdf_parser, []
+
+    def after_create(self, harvest_object, dataset_dict, temp_dict):
+        log.debug("In StadtzhLosdHarvester after_create")
+        self._touch_resources(dataset_dict)
+
+    def after_update(self, harvest_object, dataset_dict, temp_dict):
+        log.debug("In StadtzhLosdHarvester after_update")
+        self._touch_resources(dataset_dict)
+
+    # submit resources to xloader
+    def _touch_resources(self, dataset_dict):
+        context = {
+            "model": model,
+            "session": model.Session,
+            "user": self._get_user_name(),
+            "ignore_auth": True,
+        }
+        dataset = get_action("package_show")(context, {"id": dataset_dict["id"]})
+
+        for resource in dataset["resources"]:
+            get_action("xloader_submit")(context, {"resource_id": resource["id"]})
 
     def _get_content_and_type(self, views_url, harvest_job, page=1, content_type=None):
         """
