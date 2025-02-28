@@ -70,8 +70,10 @@ class StadtzhLosdDcatProfile(RDFProfile):
     An RDF profile for the LOSD Harvester
     """
 
-    def __init__(self, graph, compatibility_mode=False):
-        super(StadtzhLosdDcatProfile, self).__init__(graph, compatibility_mode)
+    def __init__(self, graph, dataset_type="dataset", compatibility_mode=False):
+        super(StadtzhLosdDcatProfile, self).__init__(
+            graph, dataset_type, compatibility_mode
+        )
 
     def parse_dataset(self, dataset_dict, dataset_ref):
         log.debug("Parsing dataset '%r'" % dataset_ref)
