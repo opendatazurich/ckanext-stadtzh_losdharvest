@@ -13,6 +13,9 @@ from ckanext.dcat.harvesters.rdf import DCATRDFHarvester
 from ckanext.dcat.interfaces import IDCATRDFHarvester
 from ckanext.dcat.processors import RDFParserException
 from ckanext.stadtzh_losdharvest.processors import LosdViewsParser
+from ckanext.stadtzhtheme.plugin import (
+    ogdzh_package_create_default_resource_views,
+)
 
 log = logging.getLogger(__name__)
 
@@ -109,6 +112,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         for resource in dataset["resources"]:
             get_action("xloader_submit")(context, {"resource_id": resource["id"]})
+
+        ogdzh_package_create_default_resource_views(context, dataset)
 
     def _get_content_and_type(self, views_url, harvest_job, page=1, content_type=None):
         """
