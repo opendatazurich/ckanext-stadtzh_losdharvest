@@ -180,3 +180,22 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             return dataset_dict["name"]
 
         return None
+
+    def _read_datasets_from_db(self, guid):
+        """
+        Overwritten from DCATHarvester as the guid disappears from package_extras
+        when the dataset is updated outside the harvesting context.
+        """
+        datasets = super()._read_datasets_from_db(guid)
+        if not datasets:
+            log.info(
+                "Checking for datasets with id=guid, as the given guid was not"
+                " found in package_extras but we might have a package with that id."
+            )
+            datasets = (
+                model.Session.query(model.Package.id)
+                .filter(model.Package.name == guid)
+                .filter(model.Package.state == "active")
+                .all()
+            )
+        return datasets
