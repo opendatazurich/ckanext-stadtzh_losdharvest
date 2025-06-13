@@ -66,6 +66,15 @@ configuration. If it is not set, the default value is "text/turtle"::
     }
 
 
+-----------------------
+Data Validation
+-----------------------
+
+The Harvester imports datasets on the following conditions::
+
+dcterms:issued
+    Dataset will not be published if its issued date is in the future.
+
 ------------------------
 Development Installation
 ------------------------
