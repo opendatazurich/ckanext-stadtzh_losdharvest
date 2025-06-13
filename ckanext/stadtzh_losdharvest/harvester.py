@@ -188,6 +188,10 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         """
         datasets = super()._read_datasets_from_db(guid)
         if not datasets:
+            log.info(
+                "Checking for datasets with id=guid, as the given guid was not"
+                " found in package_extras but we might have a package with that id."
+            )
             datasets = (
                 model.Session.query(model.Package.id)
                 .filter(model.Package.name == guid)
