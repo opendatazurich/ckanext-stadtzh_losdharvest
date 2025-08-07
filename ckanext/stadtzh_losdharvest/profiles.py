@@ -6,6 +6,8 @@ import logging
 import isodate
 import rdflib
 from ckan.lib.munge import munge_tag, munge_title_to_name
+from ckan.logic import get_action
+import ckan.model as model
 from markdownify import markdownify as md
 from rdflib.namespace import RDF, RDFS, SKOS, Namespace
 
@@ -16,6 +18,8 @@ from ckanext.stadtzhharvest.utils import (
     stadtzhharvest_find_or_create_organization,
     stadtzhharvest_get_group_names,
 )
+
+from pprint import pformat
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +78,15 @@ class StadtzhLosdDcatProfile(RDFProfile):
         super(StadtzhLosdDcatProfile, self).__init__(
             graph, dataset_type, compatibility_mode
         )
+
+    def _get_existing_dataset_resources(self, dataset_dict_id):
+        context = {
+            "model": model,
+            "session": model.Session,
+            "ignore_auth": True,
+        }
+        package_dict = get_action("package_show")(context, {"id": dataset_dict_id})
+        return package_dict.get("resources")
 
     def parse_dataset(self, dataset_dict, dataset_ref):
         log.debug("Parsing dataset '%r'" % dataset_ref)
@@ -202,11 +215,23 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         return result_attributes
 
+    def _get_existing_resource_by_name(self, name: str, resources: list[dict]) -> str | None:
+        return next((res for res in resources if res["name"] == name), None)
+
     def _build_resources_dict(self, dataset_ref, dataset_dict):
         """Get resources for the dataset."""
+
         resource_list = []
+
+        existing_resources = self._get_existing_dataset_resources(dataset_dict.get("name"))
+
         for resource_ref in self.g.objects(dataset_ref, DCAT.distribution):
-            resource_dict = {}
+
+            if (existing_resource := self._get_existing_resource_by_name(dataset_dict["name"], existing_resources)):
+                resource_dict = existing_resource
+            else:
+                resource_dict = {}
+
             # For some reason, DCTERMS.format does not work so we have to
             # use the explicit URIRef here.
             for key, predicate in (
