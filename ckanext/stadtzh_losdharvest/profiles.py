@@ -80,7 +80,6 @@ class StadtzhLosdDcatProfile(RDFProfile):
 
         stadtzhharvest_find_or_create_organization(dataset_dict)
         dataset_dict["extras"] = []
-        dataset_dict["resources"] = []
 
         # Basic fields
         for key, predicate in (
