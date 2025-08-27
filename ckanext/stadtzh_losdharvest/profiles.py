@@ -76,7 +76,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
         )
 
     def parse_dataset(self, dataset_dict, dataset_ref):
-        log.debug("Parsing dataset '%r'" % dataset_ref)
+        log.debug(f"Parsing dataset '{dataset_ref!r}'")
 
         stadtzhharvest_find_or_create_organization(dataset_dict)
         dataset_dict["extras"] = []
@@ -183,7 +183,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             position = self._object_value_int(ref, SCHEMA.position) or 0
 
             if tech_name is not None:
-                attribute_name = "%s (technisch: %s)" % (speak_name, tech_name)
+                attribute_name = f"{speak_name} (technisch: {tech_name})"
             else:
                 attribute_name = speak_name
 
