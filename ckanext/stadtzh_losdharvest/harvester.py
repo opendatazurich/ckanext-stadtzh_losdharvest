@@ -68,8 +68,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             # If the date_str doesn't have the expected format %d.%m.%Y, it means we
             # got a weird value from the source and couldn't convert it.
             log.warning(
-                "Value of DCT.issued in dataset {} should be an ISO 8601 date string. "
-                "Instead we got: {}".format(dataset.get("name"), date_str)
+                f"Value of DCT.issued in dataset {dataset.get('name')} should be an "
+                f"ISO 8601 date string. Instead we got: {date_str}"
             )
             return False
 
@@ -124,10 +124,10 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
 
         try:
             if page > 1:
-                views_url = views_url + "&" if "?" in views_url else views_url + "?"
-                views_url = views_url + "page={0}".format(page)
+                views_url = f"{views_url}&" if "?" in views_url else f"{views_url}?"
+                views_url = f"{views_url}page={page}"
 
-            log.debug("Getting file %s", views_url)
+            log.debug(f"Getting file {views_url}")
 
             session = requests.Session()
             self.update_session(session)
@@ -141,10 +141,9 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                 content_type = r.headers.get("content-type").split(";", 1)[0]
 
         except requests.exceptions.RequestException as error:
-            msg = """Could not get content from %s because an
-                                error occurred. %s""" % (
-                views_url,
-                error,
+            msg = (
+                f"Could not get content from {views_url} because an error occurred. "
+                f"{error}"
             )
             self._save_gather_error(msg, harvest_job)
             return None, None
@@ -154,9 +153,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         try:
             parser.parse(content, _format=content_type)
         except RDFParserException as e:
-            self._save_gather_error(
-                "Error parsing the views graph: {0}".format(e), harvest_job
-            )
+            self._save_gather_error(f"Error parsing the views graph: {e}", harvest_job)
             return None, None
 
         results = ""
