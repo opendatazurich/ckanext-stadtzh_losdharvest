@@ -63,8 +63,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
             if datetime_obj > datetime.datetime.now():
                 log.info(
                     f"Not harvesting dataset {dataset.get('name', '').upper()} because "
-                    f"its dcterms:issued date is in "
-                    f"the future: {date_str}"
+                    f"its dcterms:issued date is in the future: {date_str}"
                 )
             return datetime_obj < datetime.datetime.now()
         except (ValueError, TypeError):
