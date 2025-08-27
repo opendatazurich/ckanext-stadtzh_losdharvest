@@ -52,6 +52,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         """
         date_str = dataset.get("dateFirstPublished", None)
         if date_str is None:
+            # The dataset's name is its SCHEMA.alternateName, e.g. BEV324OD3242
             log.info(
                 f"Not harvesting dataset {dataset.get('name', '').upper()} because it "
                 f"has no value for dcterms:issued"
