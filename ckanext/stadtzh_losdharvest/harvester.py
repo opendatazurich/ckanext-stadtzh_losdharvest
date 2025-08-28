@@ -52,24 +52,26 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         """
         date_str = dataset.get("dateFirstPublished", None)
         if date_str is None:
+            # The dataset's name is its SCHEMA.alternateName, e.g. BEV324OD3242
             log.info(
-                "Not harvesting dataset {} because it has no value for dcterms:issued"
+                f"Not harvesting dataset {dataset.get('name', '').upper()} because it "
+                f"has no value for dcterms:issued"
             )
             return False
         try:
             datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
             if datetime_obj > datetime.datetime.now():
                 log.info(
-                    "Not harvesting dataset {} because its dcterms:issued date is in "
-                    "the future"
+                    f"Not harvesting dataset {dataset.get('name', '').upper()} because "
+                    f"its dcterms:issued date is in the future: {date_str}"
                 )
             return datetime_obj < datetime.datetime.now()
         except (ValueError, TypeError):
             # If the date_str doesn't have the expected format %d.%m.%Y, it means we
             # got a weird value from the source and couldn't convert it.
             log.warning(
-                "Value of DCT.issued in dataset {} should be an ISO 8601 date string. "
-                "Instead we got: {}".format(dataset.get("name"), date_str)
+                f"Value of DCT.issued in dataset {dataset.get('name', '').upper()} "
+                f"should be an ISO 8601 date string. Instead we got: {date_str}"
             )
             return False
 
@@ -127,7 +129,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
                 views_url = views_url + "&" if "?" in views_url else views_url + "?"
                 views_url = views_url + "page={0}".format(page)
 
-            log.debug("Getting file %s", views_url)
+            log.debug(f"Getting file {views_url}")
 
             session = requests.Session()
             self.update_session(session)
@@ -189,8 +191,8 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         datasets = super()._read_datasets_from_db(guid)
         if not datasets:
             log.info(
-                "Checking for datasets with id=guid, as the given guid was not"
-                " found in package_extras but we might have a package with that id."
+                f"Checking for datasets with id=guid, as the given guid {guid} was not "
+                f"found in package_extras but we might have a package with that id."
             )
             datasets = (
                 model.Session.query(model.Package.id)
