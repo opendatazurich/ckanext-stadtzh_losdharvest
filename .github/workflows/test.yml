@@ -4,10 +4,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
       - name: Install requirements
-        run: pip install flake8 pycodestyle black isort
+        run: pip install -r dev-requirements.txt
       - name: Check syntax
         run: flake8 . --count --select=C901,E901,E999,F401,F821,F822,F823 --show-source --statistics --extend-exclude ckan
       - name: Check codestyle
@@ -19,16 +19,17 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        ckan-version: ["2.10"]
+        ckan-version: ["2.11"]
       fail-fast: false
 
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     container:
-      image: openknowledge/ckan-dev:${{ matrix.ckan-version }}
+      image: ckan/ckan-dev:${{ matrix.ckan-version }}
+      options: --user root
     services:
       solr:
-        image: ckan/ckan-solr:${{ matrix.ckan-version }}
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
@@ -39,7 +40,7 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-          image: redis:3
+        image: redis:3
     env:
       CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
       CKAN_DATASTORE_WRITE_URL: postgresql://datastore_write:pass@postgres/datastore_test
@@ -48,33 +49,32 @@ jobs:
       CKAN_REDIS_URL: redis://redis:6379/1
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Install requirements
-      run: |
-        pip install -r requirements.txt
-        pip install -r dev-requirements.txt
-        pip install -e .
-        pip install -U requests[security]
-    - name: Install required ckanexts
-      run: |
-        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-theme.git@main#egg=ckanext-stadtzh-theme && \
-        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-theme/main/pip-requirements.txt && \
-        pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-harvest.git@main#egg=ckanext-stadtzh-harvest && \
-        pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-harvest/main/requirements.txt
-        pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
-        pip install -e git+https://github.com/ckan/ckanext-xloader.git#egg=ckanext-xloader && \
-        pip install -e git+https://github.com/ckan/ckanext-harvest.git#egg=ckanext-harvest && \
-        pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
-        pip install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
-        pip install -r https://raw.githubusercontent.com/ckan/ckanext-dcat/master/requirements.txt
-    - name: Adjust test.ini
-      run: |
-        # Replace default path to CKAN core config file with the one on the container
-        sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
-    - name: Set up extension
-      run: |
-        ckan config-tool test.ini "ckan.plugins = "
-        ckan -c test.ini db init
-        ckan config-tool test.ini "ckan.plugins = harvest stadtzh_harvester dcat stadtzhtheme stadtzh_losdharvest"
-    - name: Run tests
-      run: pytest --ckan-ini=test.ini --cov=ckanext.stadtzh_losdharvest --disable-warnings ckanext/stadtzh_losdharvest/tests
+      - uses: actions/checkout@v5
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+          pip install -e .
+          pip install -U requests[security]
+      - name: Install required ckanexts
+        run: |
+          pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-theme.git@update/update-to-ckan-2.11#egg=ckanext-stadtzh-theme && \
+          pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-theme/update/update-to-ckan-2.11/pip-requirements.txt && \
+          pip install -e git+https://github.com/opendatazurich/ckanext-stadtzh-harvest.git@feat/update-to-ckan-2.11#egg=ckanext-stadtzh-harvest && \
+          pip install -r https://raw.githubusercontent.com/opendatazurich/ckanext-stadtzh-harvest/feat/update-to-ckan-2.11/requirements.txt
+          pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
+          pip install -e git+https://github.com/ckan/ckanext-xloader.git#egg=ckanext-xloader && \
+          pip install -e git+https://github.com/ckan/ckanext-harvest.git#egg=ckanext-harvest && \
+          pip install -r https://raw.githubusercontent.com/ckan/ckanext-harvest/master/requirements.txt && \
+          pip install -e git+https://github.com/ckan/ckanext-dcat.git#egg=ckanext-dcat && \
+          pip install -r https://raw.githubusercontent.com/ckan/ckanext-dcat/master/requirements.txt
+      - name: Adjust test.ini
+        run: |
+          # Replace default path to CKAN core config file with the one on the container
+          sed -i -e 's/use = config:.*/use = config:\/srv\/app\/src\/ckan\/test-core.ini/' test.ini
+      - name: Init database
+        run: |
+          ckan -c test.ini db init
+          ckan -c test.ini db pending-migrations --apply
+      - name: Run tests
+        run: pytest --ckan-ini=test.ini --cov=ckanext.stadtzh_losdharvest --disable-warnings ckanext/stadtzh_losdharvest/tests
