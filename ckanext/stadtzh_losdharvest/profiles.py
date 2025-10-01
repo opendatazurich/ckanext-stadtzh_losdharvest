@@ -204,7 +204,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return result_attributes
 
     def _build_resources_dict(self, dataset_ref, dataset_dict):
-        """Get resources for the dataset."""
+        """Get resources for the dataset.
+
+        The distributions in the LOSD graph are bnodes and have no URI, but in the
+        DCATRDFHarvester import_stage, the resource URI is used to identify resources
+        that already exist on a dataset.
+        """
         resource_list = []
         for resource_ref in self.g.objects(dataset_ref, DCAT.distribution):
             resource_dict = {}
@@ -212,6 +217,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             # use the explicit URIRef here.
             for key, predicate in (
                 ("url", DCAT.downloadURL),
+                ("uri", DCAT.downloadURL),
                 (
                     "format",
                     rdflib.term.URIRef("http://purl.org/dc/terms/format"),
