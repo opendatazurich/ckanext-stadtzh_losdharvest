@@ -70,11 +70,13 @@ class StadtzhLosdDcatProfile(RDFProfile):
     An RDF profile for the LOSD Harvester
     """
 
-    def __init__(self, graph, compatibility_mode=False):
-        super(StadtzhLosdDcatProfile, self).__init__(graph, compatibility_mode)
+    def __init__(self, graph, dataset_type="dataset", compatibility_mode=False):
+        super(StadtzhLosdDcatProfile, self).__init__(
+            graph, dataset_type, compatibility_mode
+        )
 
     def parse_dataset(self, dataset_dict, dataset_ref):
-        log.debug("Parsing dataset '%r'" % dataset_ref)
+        log.debug(f"Parsing dataset '{dataset_ref!r}'")
 
         stadtzhharvest_find_or_create_organization(dataset_dict)
         dataset_dict["extras"] = []
@@ -182,7 +184,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             position = self._object_value_int(ref, SCHEMA.position) or 0
 
             if tech_name is not None:
-                attribute_name = "%s (technisch: %s)" % (speak_name, tech_name)
+                attribute_name = f"{speak_name} (technisch: {tech_name})"
             else:
                 attribute_name = speak_name
 
@@ -203,7 +205,12 @@ class StadtzhLosdDcatProfile(RDFProfile):
         return result_attributes
 
     def _build_resources_dict(self, dataset_ref, dataset_dict):
-        """Get resources for the dataset."""
+        """Get resources for the dataset.
+
+        The distributions in the LOSD graph are bnodes and have no URI, but in the
+        DCATRDFHarvester import_stage, the resource URI is used to identify resources
+        that already exist on a dataset.
+        """
         resource_list = []
         for resource_ref in self.g.objects(dataset_ref, DCAT.distribution):
             resource_dict = {}
@@ -211,6 +218,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             # use the explicit URIRef here.
             for key, predicate in (
                 ("url", DCAT.downloadURL),
+                ("uri", DCAT.downloadURL),
                 (
                     "format",
                     rdflib.term.URIRef("http://purl.org/dc/terms/format"),

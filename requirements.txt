@@ -1,1 +1,1 @@
-markdownify==0.11.6
+markdownify==1.2.0
