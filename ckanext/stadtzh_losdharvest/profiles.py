@@ -88,6 +88,7 @@ class StadtzhLosdDcatProfile(RDFProfile):
             ("updateInterval", DCTERMS.accrualPeriodicity),
             ("license_id", DCTERMS.license),
             ("author", SCHEMA.author),
+            ("dataQuality", RDFS.comment),
         ):
             value = self._object_value(dataset_ref, predicate)
             if value:
