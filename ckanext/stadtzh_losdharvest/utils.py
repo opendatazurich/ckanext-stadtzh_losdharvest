@@ -22,10 +22,10 @@ def get_content_and_type(url, content_type=None):
     """
 
     if not url.lower().startswith("http"):
-        raise ValueError("Url should start with http: {}".format(url))
+        raise ValueError(f"Url should start with http: {url}")
 
     try:
-        log.debug("Getting file %s", url)
+        log.debug(f"Getting file {url}")
 
         session = requests.Session()
         session.headers.update({"Accept": "text/turtle"})
@@ -51,21 +51,19 @@ def get_content_and_type(url, content_type=None):
         return content, content_type
 
     except requests.exceptions.HTTPError as error:
-        msg = "Could not get content from %s. Server responded with %s %s" % (
-            url,
-            error.response.status_code,
-            error.response.reason,
+        msg = (
+            f"Could not get content from {url}. Server responded with "
+            f"{error.response.status_code} {error.response.reason}"
         )
         raise RuntimeError(msg)
     except requests.exceptions.ConnectionError as error:
-        msg = """Could not get content from %s because a
-                                connection error occurred. %s""" % (
-            url,
-            error,
+        msg = (
+            f"Could not get content from {url} because a connection error occurred. "
+            f"{error}"
         )
         raise RuntimeError(msg)
     except requests.exceptions.Timeout:
-        msg = "Could not get content from %s because the connection timed" " out." % url
+        msg = f"Could not get content from {url} because the connection timed out."
         raise RuntimeError(msg)
 
 
@@ -79,9 +77,9 @@ def make_head_request(url, session):
 
     cl = r.headers.get("content-length")
     if cl and int(cl) > MAX_FILE_SIZE:
-        msg = """Remote file is too big. Allowed
-                        file size: {allowed}, Content-Length: {actual}.""".format(
-            allowed=MAX_FILE_SIZE, actual=cl
+        msg = (
+            f"Remote file is too big. Allowed file size: {MAX_FILE_SIZE}, "
+            f"Content-Length: {cl}."
         )
         raise RuntimeError(msg)
 
