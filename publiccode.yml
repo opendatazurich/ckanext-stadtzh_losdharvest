@@ -18,6 +18,10 @@ dependsOn:
   open:
     - name: CKAN
       versionMin: "2.11"
+    - name: ckanext-stadtzh-theme
+      versionMin: "v1.3.1"
+    - name: ckanext-stadtzh-harvest
+      versionMin: "v1.2.1"
 description:
   en:
     localisedName: ckanext-stadtzh_losdharvest
