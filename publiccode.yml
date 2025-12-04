@@ -1,0 +1,45 @@
+publiccodeYmlVersion: 0.5.0
+name: ckanext-stadtzh_losdharvest
+url: https://github.com/opendatazurich/ckanext-stadtzh_losdharvest
+releaseDate: 2022-10-27
+logo: https://data.stadt-zuerich.ch/logo.svg
+platforms:
+  - web
+categories:
+  - data-visualization
+  - data-collection
+organisation:
+  uri: https://data.stadt-zuerich.ch
+usedBy:
+  - Statistik Stadt Zürich (SSZ)
+developmentStatus: development
+softwareType: addon
+dependsOn:
+  open:
+    - name: CKAN
+    - versionMin: "2.11"
+description:
+  en:
+    localisedName: ckanext-stadtzh_losdharvest
+    shortDescription: CKAN extension implementing a harvester to import datasets from the City of Zürich's LOSD portal to its CKAN instance (https://data.stadt-zuerich.ch/)
+    longDescription: ckanext-stadtzh_losdharvest is a plugin/extension for CKAN, based on ckanext-harvest (https://github.com/ckan/ckanext-harvest) and ckanext-dcat (https://github.com/ckan/ckanext-dcat), that implements a harvester to import datasets from the City of Zürich's Linked Open Statistical Data (LOSD) portal (https://ld.integ.stzh.ch/sparql/) to their OGD Platform (https://data.stadt-zuerich.ch/).
+    features:
+      - implementing a harvester that imports data from LOSD to OGD
+legal:
+  license: GPL-3.0-only
+maintenance:
+  type: contract
+  contractors:
+    - name: Liip AG
+      until: 2030-12-01
+      email: opendata@liip.ch
+      website: https://www.liip.ch/
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - de
+intendedAudience:
+  scope:
+    - government
+    - local-authorities
+    - research
