@@ -45,7 +45,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         session.headers.update({"Accept": "text/turtle"})
         return session
 
-
     def after_parsing(self, rdf_parser, harvest_job):
         """Called just after the content from the remote RDF file has been parsed
 
