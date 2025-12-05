@@ -46,34 +46,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         session.headers.update({"Accept": "text/turtle"})
         return session
 
-    def _is_published(self, dataset):
-        """Return True if the dataset has a dateFirstPublished in the past.
-        This value is mapped from the attribute dcterms:issued.
-        """
-        date_str = dataset.get("dateFirstPublished", None)
-        if date_str is None:
-            # The dataset's name is its SCHEMA.alternateName, e.g. BEV324OD3242
-            log.info(
-                f"Not harvesting dataset {dataset.get('name', '').upper()} because it "
-                f"has no value for dcterms:issued"
-            )
-            return False
-        try:
-            datetime_obj = datetime.datetime.strptime(date_str, "%d.%m.%Y")
-            if datetime_obj > datetime.datetime.now():
-                log.info(
-                    f"Not harvesting dataset {dataset.get('name', '').upper()} because "
-                    f"its dcterms:issued date is in the future: {date_str}"
-                )
-            return datetime_obj < datetime.datetime.now()
-        except (ValueError, TypeError):
-            # If the date_str doesn't have the expected format %d.%m.%Y, it means we
-            # got a weird value from the source and couldn't convert it.
-            log.warning(
-                f"Value of DCT.issued in dataset {dataset.get('name', '').upper()} "
-                f"should be an ISO 8601 date string. Instead we got: {date_str}"
-            )
-            return False
 
     def after_parsing(self, rdf_parser, harvest_job):
         """Called just after the content from the remote RDF file has been parsed
@@ -83,11 +55,7 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         """
         all_datasets = rdf_parser.datasets()
 
-        def filter_datasets():
-            for dataset in filter(self._is_published, all_datasets):
-                yield dataset
-
-        rdf_parser.datasets = filter_datasets
+        rdf_parser.datasets = all_datasets
 
         return rdf_parser, []
 
