@@ -45,18 +45,6 @@ class StadtzhLosdHarvester(DCATRDFHarvester):
         session.headers.update({"Accept": "text/turtle"})
         return session
 
-    def after_parsing(self, rdf_parser, harvest_job):
-        """Called just after the content from the remote RDF file has been parsed
-
-        Filters the datasets in the parser to only include those that have been
-        published (according to the dateFirstPublished field).
-        """
-        all_datasets = rdf_parser.datasets()
-
-        rdf_parser.datasets = all_datasets
-
-        return rdf_parser, []
-
     def after_create(self, harvest_object, dataset_dict, temp_dict):
         log.debug("In StadtzhLosdHarvester after_create")
         self._touch_resources(dataset_dict)
