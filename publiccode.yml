@@ -11,7 +11,7 @@ organisation:
   uri: https://data.stadt-zuerich.ch
 usedBy:
   - Statistik Stadt Zürich (SSZ)
-developmentStatus: development
+developmentStatus: beta
 softwareType: addon
 dependsOn:
   open:
